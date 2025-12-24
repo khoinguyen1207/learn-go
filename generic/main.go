@@ -1,4 +1,4 @@
-package generic
+package main
 
 import (
 	"cmp"
@@ -28,7 +28,7 @@ func max[T cmp.Ordered](a, b T) T {
 	return a
 }
 
-func Example() {
+func main() {
 	// printValue("Nguyen")
 	// printValue(3)
 	// printValue(true)

@@ -1,8 +1,8 @@
-package array
+package main
 
 import "fmt"
 
-func Example() {
+func main() {
 	var numbers [3]int = [3]int{1, 2, 3}
 	fmt.Println(numbers)    // [1 2 3]
 	fmt.Println(numbers[0]) // 1

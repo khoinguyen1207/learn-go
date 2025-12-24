@@ -1,4 +1,4 @@
-package interfaces
+package main
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ func PrintValue(val interface{}) {
 	}
 }
 
-func Example() {
+func main() {
 	dog, err := dog.New("Bull")
 	if err != nil {
 		panic(err)

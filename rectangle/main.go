@@ -1,4 +1,4 @@
-package rectangle
+package main
 
 import (
 	"encoding/json"
@@ -26,7 +26,7 @@ func (r *Rectangle) Perimeter() float32 {
 	return (r.Width + r.Height) * 2
 }
 
-func RectangleExample() {
+func main() {
 	rectangle := Rectangle{
 		Width:  10,
 		Height: 20,
