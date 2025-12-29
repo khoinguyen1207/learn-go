@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/khoinguyen/learn-go/cms/student"
 	"github.com/khoinguyen/learn-go/cms/utils"
 )
 
@@ -20,7 +21,7 @@ func main() {
 
 		switch choice {
 		case 1:
-			fmt.Println("s")
+			student.StudentService()
 		case 2:
 			fmt.Println("s")
 		case 3:

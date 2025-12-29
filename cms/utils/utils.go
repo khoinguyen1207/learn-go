@@ -29,6 +29,18 @@ func GetPositiveInt(prompt string) int {
 	}
 }
 
+func GetPositiveFloat(prompt string) float64 {
+	for {
+		input := ReadInput(prompt)
+
+		output, err := strconv.ParseFloat(input, 64)
+		if err == nil && output > 0 {
+			return output
+		}
+		fmt.Println("Input invalid")
+	}
+}
+
 func ClearScreen() {
 	var cmd *exec.Cmd
 
