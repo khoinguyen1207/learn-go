@@ -41,6 +41,33 @@ func GetPositiveFloat(prompt string) float64 {
 	}
 }
 
+func GetOptionalPositiveFloat(prompt string, prevData float64) float64 {
+	input := ReadInput(prompt)
+	output, err := strconv.ParseFloat(input, 64)
+	if err != nil && output <= 0 {
+		return prevData
+	}
+	return output
+}
+
+func GetNonEmptyString(prompt string) string {
+	for {
+		input := ReadInput(prompt)
+		if input != "" {
+			return input
+		}
+		fmt.Println("Input cannot be empty")
+	}
+}
+
+func GetOptionalString(prompt string, prevData string) string {
+	input := ReadInput(prompt)
+	if input == "" {
+		return prevData
+	}
+	return input
+}
+
 func ClearScreen() {
 	var cmd *exec.Cmd
 
@@ -53,4 +80,17 @@ func ClearScreen() {
 
 	cmd.Stdout = os.Stdout
 	cmd.Run()
+}
+
+type HasId interface {
+	GetId() int
+}
+
+func IsIdUnique[T HasId](id int, list []T) bool {
+	for _, item := range list {
+		if item.GetId() == id {
+			return false
+		}
+	}
+	return true
 }

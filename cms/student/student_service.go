@@ -12,9 +12,16 @@ func createStudent() {
 	fmt.Println("=== Create Student ===")
 
 	var scores []float64
-	id := utils.GetPositiveInt("Id: ")
-	name := utils.ReadInput("Name: ")
-	class := utils.ReadInput("Class: ")
+	var id int
+	for {
+		id = utils.GetPositiveInt("Id: ")
+		if utils.IsIdUnique(id, students) {
+			break
+		}
+		fmt.Println("Duplicate Id")
+	}
+	name := utils.GetNonEmptyString("Name: ")
+	class := utils.GetNonEmptyString("Class: ")
 	totalScore := utils.GetPositiveInt("Total Score: ")
 
 	for i := 1; i <= totalScore; i++ {
@@ -29,8 +36,6 @@ func createStudent() {
 		Scores: scores,
 	}
 
-	fmt.Println("New student: ", student)
-
 	students = append(students, student)
 
 	fmt.Println("=> Create student successfully!")
@@ -38,6 +43,33 @@ func createStudent() {
 
 func updateStudent() {
 	fmt.Println("=== Update Student ===")
+	id := utils.GetPositiveInt("Id: ")
+
+	for index, student := range students {
+		if student.Id == id {
+			fmt.Printf("====== Update student with id=%d ====== \n", id)
+			student := students[index]
+
+			name := utils.GetOptionalString(fmt.Sprintf("- Name (%s): ", student.Name), student.Name)
+			class := utils.GetOptionalString(fmt.Sprintf("- Class (%s): ", student.Class), student.Class)
+			newScores := make([]float64, len(student.Scores))
+			for i, sc := range student.Scores {
+				prompt := fmt.Sprintf("- Input score %d (%2f): ", i+1, sc)
+				newScores[i] = utils.GetOptionalPositiveFloat(prompt, sc)
+			}
+
+			students[index] = Student{
+				Id:     id,
+				Name:   name,
+				Class:  class,
+				Scores: newScores,
+			}
+
+			fmt.Println("Update student successfully!")
+			return
+		}
+	}
+	fmt.Println("Student not found")
 }
 
 func deleteStudent() {
@@ -51,7 +83,7 @@ func listStudent() {
 		return
 	}
 	for _, s := range students {
-		fmt.Println(s)
+		fmt.Println(s.GetInfo())
 	}
 }
 
@@ -73,6 +105,8 @@ func StudentService() {
 
 		choice := utils.GetPositiveInt("=> Choose an option: ✨ ")
 
+		fmt.Println()
+
 		switch choice {
 		case 1:
 			createStudent()
@@ -91,6 +125,7 @@ func StudentService() {
 			fmt.Println("Invalid choice, please try again. ❌")
 		}
 
+		fmt.Println()
 		utils.ReadInput("Please enter to continute....")
 	}
 }
