@@ -74,6 +74,17 @@ func updateStudent() {
 
 func deleteStudent() {
 	fmt.Println("=== Delete Student ===")
+	id := utils.GetPositiveInt("Id: ")
+
+	for index, student := range students {
+		if student.Id == id {
+			students = append(students[:index], students[index+1:]...)
+
+			fmt.Println("Delete student successfully!")
+			return
+		}
+	}
+	fmt.Println("Student not found")
 }
 
 func listStudent() {
