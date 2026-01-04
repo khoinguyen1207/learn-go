@@ -15,24 +15,39 @@ func AddBook(store *LibraryStore) error {
 	newBook := model.NewBook(id, title, author)
 	store.books[id] = *newBook
 	fmt.Println("✅ Book added successfully!")
-	fmt.Printf("Book ID: %+v\n", store.books)
 
 	return nil
 }
 
-func ViewBooks() {
-	// Implementation for viewing books
+func ViewBooks(store *LibraryStore) {
+	for _, book := range store.books {
+		fmt.Printf("ID: %s | Title: %s | Author: %s | Available: %t\n", book.ID, book.Title, book.Author, !book.IsBorrowed)
+	}
 }
 
-func AddBorrower() {
-	// Implementation for adding a borrower
+func AddBorrower(store *LibraryStore) error {
+	id := utils.GenerateId()
+	name := utils.GetNonEmptyString("- Enter borrower name: ")
+	email := utils.GetNonEmptyString("- Enter borrower email: ")
+
+	newBorrower := model.NewBorrower(id, name, email)
+	store.borrowers[id] = *newBorrower
+	fmt.Println("✅ Borrower added successfully!")
+
+	return nil
 }
 
-func ViewBorrowers() {
-	// Implementation for viewing borrowers
+func ViewBorrowers(store *LibraryStore) {
+	if len(store.borrowers) == 0 {
+		fmt.Println("No borrowers found.")
+		return
+	}
+	for _, borrower := range store.borrowers {
+		fmt.Printf("ID: %s | Name: %s | Email: %s\n", borrower.ID, borrower.Name, borrower.Email)
+	}
 }
 
-func BorrowBook() {
+func BorrowBook(store *LibraryStore) {
 	// Implementation for borrowing a book
 }
 

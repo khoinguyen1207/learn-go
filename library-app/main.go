@@ -31,16 +31,20 @@ func main() {
 			utils.ClearScreen()
 			fmt.Println("===== Add New Book =====")
 			if err := library.AddBook(store); err != nil {
-				fmt.Printf("❌ Error adding book: %v\n", err)
+				fmt.Printf("❌ Error adding book: %v", err)
 			}
 		case 2:
-			library.ViewBooks()
+			fmt.Println("===== View Books =====")
+			library.ViewBooks(store)
 		case 3:
-			library.AddBorrower()
+			fmt.Println("===== Add New Borrower =====")
+			library.AddBorrower(store)
 		case 4:
-			library.ViewBorrowers()
+			fmt.Println("===== View Borrowers =====")
+			library.ViewBorrowers(store)
 		case 5:
-			library.BorrowBook()
+			fmt.Println("===== Borrow Book =====")
+			library.BorrowBook(store)
 		case 6:
 			library.ViewBorrowHistory()
 		case 7:
@@ -54,6 +58,6 @@ func main() {
 			fmt.Println("❌ Invalid choice. Please try again.")
 		}
 
-		utils.ReadInput("Press Enter to continue... 🚀")
+		utils.ReadInput("\nPress Enter to continue... 🚀")
 	}
 }

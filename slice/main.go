@@ -24,7 +24,7 @@ func main() {
 	// fmt.Println("lens:", len(mslice2))
 	// fmt.Println("cap:", cap(mslice2))
 
-	apple1 := []int{1, 2, 3, 4}
+			apple1 := []int{1, 2, 3, 4}
 	apple2 := []int{5, 6, 7}
 
 	apple1 = append(apple1, apple2...)
