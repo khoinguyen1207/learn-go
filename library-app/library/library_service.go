@@ -47,8 +47,31 @@ func ViewBorrowers(store *LibraryStore) {
 	}
 }
 
-func BorrowBook(store *LibraryStore) {
-	// Implementation for borrowing a book
+func BorrowBook(store *LibraryStore) error {
+	transactionId := utils.GenerateId()
+	bookId := utils.GetNonEmptyString("- Enter book id: ")
+	borrowerId := utils.GetNonEmptyString("- Enter borrower id: ")
+
+	book, bookExist := store.books[bookId]
+	if !bookExist {
+		return fmt.Errorf("book with id %s does not exist", bookId)
+	}
+
+	if book.IsBorrowed {
+		return fmt.Errorf("book with id %s is already borrowed", bookId)
+	}
+
+	if _, borrowerExist := store.borrowers[borrowerId]; !borrowerExist {
+		return fmt.Errorf("borrower with id %s does not exist", borrowerId)
+	}
+
+	newTx := model.NewTransaction(transactionId, bookId, borrowerId)
+	store.transactions[transactionId] = *newTx
+	book.IsBorrowed = true
+	store.books[bookId] = book
+	fmt.Println("✅ Book borrowed successfully!")
+
+	return nil
 }
 
 func ReturnBook() {

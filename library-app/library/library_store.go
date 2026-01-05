@@ -5,8 +5,9 @@ import (
 )
 
 type LibraryStore struct {
-	books     map[string]model.Book
-	borrowers map[string]model.Borrower
+	books        map[string]model.Book
+	borrowers    map[string]model.Borrower
+	transactions map[string]model.Transaction
 }
 
 func NewLibraryStore() *LibraryStore {
@@ -23,7 +24,8 @@ func NewLibraryStore() *LibraryStore {
 	}
 
 	return &LibraryStore{
-		books:     initialBooks,
-		borrowers: initialBorrowers,
+		books:        initialBooks,
+		borrowers:    initialBorrowers,
+		transactions: make(map[string]model.Transaction),
 	}
 }
