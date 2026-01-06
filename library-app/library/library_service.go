@@ -2,6 +2,8 @@ package library
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/khoinguyen/learn-go/library-app/model"
 	"github.com/khoinguyen/learn-go/library-app/utils"
@@ -74,14 +76,74 @@ func BorrowBook(store *LibraryStore) error {
 	return nil
 }
 
-func ReturnBook() {
-	// Implementation for returning a book
+func ViewBorrowHistory(store *LibraryStore) error {
+
+	borrowerId := utils.GetNonEmptyString("- Enter borrower id: ")
+	if _, borrowerExist := store.borrowers[borrowerId]; !borrowerExist {
+		return fmt.Errorf("borrower with id %s does not exist", borrowerId)
+	}
+
+	var history []model.Transaction
+	for _, tx := range store.transactions {
+		if tx.BorrowerID == borrowerId {
+			history = append(history, tx)
+		}
+	}
+
+	if len(history) == 0 {
+		fmt.Println("No borrow history found for this borrower.")
+		return nil
+	}
+	for _, tx := range history {
+		returnDate := "Not returned yet"
+		if !tx.ReturnDate.IsZero() {
+			returnDate = tx.ReturnDate.Format("2006-01-02")
+		}
+		fmt.Printf("Transaction ID: %s | Book ID: %s | Borrower ID: %s | Borrow Date: %s | Return Date: %s\n",
+			tx.TransactionId, tx.BookID, tx.BorrowerID, tx.BorrowDate.Format("2006-01-02"), returnDate)
+	}
+	return nil
 }
 
-func ViewBorrowHistory() {
-	// Implementation for viewing borrow history
+func ReturnBook(store *LibraryStore) error {
+	transactionId := utils.GetNonEmptyString("- Enter transaction id: ")
+	tx, txExist := store.transactions[transactionId]
+	if !txExist {
+		return fmt.Errorf("transaction with id %s does not exist", transactionId)
+	}
+
+	if !tx.ReturnDate.IsZero() {
+		return fmt.Errorf("book for transaction id %s has already been returned", transactionId)
+	}
+
+	book := store.books[tx.BookID]
+	book.IsBorrowed = false
+	store.books[tx.BookID] = book
+
+	tx.ReturnDate = time.Now()
+	store.transactions[transactionId] = tx
+	fmt.Println("✅ Book returned successfully!")
+
+	return nil
 }
 
-func SearchBooks() {
-	// Implementation for searching books
+func SearchBooks(store *LibraryStore) {
+	query := utils.GetNonEmptyString("- Enter search query (title or author): ")
+	query = strings.ToLower(query)
+
+	var results []model.Book
+	for _, book := range store.books {
+		if strings.Contains(strings.ToLower(book.Title), query) || strings.Contains(strings.ToLower(book.Author), query) {
+			results = append(results, book)
+		}
+	}
+
+	if len(results) == 0 {
+		fmt.Println("No books found matching the query.")
+		return
+	}
+
+	for _, book := range results {
+		fmt.Printf("ID: %s | Title: %s | Author: %s | Available: %t\n", book.ID, book.Title, book.Author, !book.IsBorrowed)
+	}
 }

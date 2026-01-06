@@ -44,13 +44,22 @@ func main() {
 			library.ViewBorrowers(store)
 		case 5:
 			fmt.Println("===== Borrow Book =====")
-			library.BorrowBook(store)
+			if err := library.BorrowBook(store); err != nil {
+				fmt.Printf("❌ Error borrowing book: %v", err)
+			}
 		case 6:
-			library.ViewBorrowHistory()
+			fmt.Println("===== Borrow History =====")
+			if err := library.ViewBorrowHistory(store); err != nil {
+				fmt.Printf("❌ Error viewing borrow history: %v", err)
+			}
 		case 7:
-			library.ReturnBook()
+			fmt.Println("===== Return Book =====")
+			if err := library.ReturnBook(store); err != nil {
+				fmt.Printf("❌ Error returning book: %v", err)
+			}
 		case 8:
-			library.SearchBooks()
+			fmt.Println("===== Search Books =====")
+			library.SearchBooks(store)
 		case 9:
 			fmt.Println("👋 Goodbye!")
 			return

@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type Book struct {
 	ID         string
@@ -46,6 +48,5 @@ func NewTransaction(transactionId, bookID, borrowerID string) *Transaction {
 		BookID:        bookID,
 		BorrowerID:    borrowerID,
 		BorrowDate:    time.Now(),
-		ReturnDate:    time.Now(),
 	}
 }
