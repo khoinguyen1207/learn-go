@@ -11,6 +11,7 @@ func task(id int, wg *sync.WaitGroup) {
 	fmt.Printf("Task %d started\n", id+1)
 	time.Sleep(1 * time.Second)
 }
+
 func main() {
 	start := time.Now()
 	var wg sync.WaitGroup
