@@ -11,14 +11,11 @@ func main() {
 	var mu sync.Mutex
 
 	for i := 1; i <= 1000; i++ {
-		wg.Add(1)
-		go func() {
+		wg.Go(func() {
 			mu.Lock()
 			count++
 			mu.Unlock()
-
-			wg.Done()
-		}()
+		})
 	}
 
 	wg.Wait()
