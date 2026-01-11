@@ -2,18 +2,15 @@ package processer
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/khoinguyen/learn-go/os-monitor/models"
-	"github.com/khoinguyen/learn-go/os-monitor/monitors"
 )
 
-func RunMonitor(ctx context.Context, wg *sync.WaitGroup, systemCh chan<- models.SystemStats) {
+func RunMonitor(ctx context.Context, wg *sync.WaitGroup, systemCh chan<- models.SystemStats, monitor models.Monitor) {
 	defer wg.Done()
-	cpuMonitor := monitors.CPUMonitor{}
-	memMonitor := monitors.MEMMonitor{}
+	m := monitor
 
 	timer := time.NewTicker(2 * time.Second)
 	defer timer.Stop()
@@ -23,17 +20,10 @@ func RunMonitor(ctx context.Context, wg *sync.WaitGroup, systemCh chan<- models.
 		case <-ctx.Done():
 			return
 		case <-timer.C:
-			cpuPercent := cpuMonitor.Check(ctx)
-			memPercent := memMonitor.Check(ctx)
-			fmt.Println("CPU:", cpuPercent, "MEM:", memPercent)
-
+			usagePercent := m.Check(ctx)
 			systemCh <- models.SystemStats{
-				Name:         "CPU",
-				UsagePercent: cpuPercent,
-			}
-			systemCh <- models.SystemStats{
-				Name:         "MEM",
-				UsagePercent: memPercent,
+				Name:         m.Name(),
+				UsagePercent: usagePercent,
 			}
 		}
 	}

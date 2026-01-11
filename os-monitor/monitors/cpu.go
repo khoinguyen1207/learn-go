@@ -11,6 +11,10 @@ import (
 type CPUMonitor struct {
 }
 
+func (m *CPUMonitor) Name() string {
+	return "CPU"
+}
+
 func (m *CPUMonitor) Check(ctx context.Context) string {
 	percents, err := cpu.PercentWithContext(ctx, 1*time.Second, false)
 

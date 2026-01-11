@@ -10,6 +10,10 @@ import (
 type MEMMonitor struct {
 }
 
+func (m *MEMMonitor) Name() string {
+	return "MEM"
+}
+
 func (m *MEMMonitor) Check(ctx context.Context) string {
 	virtualMem, err := mem.VirtualMemoryWithContext(ctx)
 
