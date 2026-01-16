@@ -13,15 +13,18 @@ var slugRegex = regexp.MustCompile("^[a-z0-9]+(?:-[a-z0-9]+)*$")
 type UserHandler struct {
 }
 
+type GetUserParams struct {
+	ID string `uri:"id" binding:"uuid"`
+}
+
 func NewUserHandler() *UserHandler {
 	return &UserHandler{}
 }
 
 func (h *UserHandler) GetUser(ctx *gin.Context) {
-	id := ctx.Param("id")
-
-	if !utils.IsValidID(id) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+	var params GetUserParams
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Id"})
 		return
 	}
 
@@ -31,8 +34,8 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 func (h *UserHandler) GetUserBySlug(ctx *gin.Context) {
 	slug := ctx.Param("slug")
 
-	if !slugRegex.MatchString(slug) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid slug format"})
+	if err := utils.RegexValidate("slug", slug, slugRegex); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
