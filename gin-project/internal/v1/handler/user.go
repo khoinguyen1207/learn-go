@@ -14,7 +14,7 @@ type UserHandler struct {
 }
 
 type GetUserParams struct {
-	ID string `uri:"id" binding:"uuid"`
+	ID int `uri:"id" binding:"gt=1"`
 }
 
 func NewUserHandler() *UserHandler {
@@ -24,7 +24,8 @@ func NewUserHandler() *UserHandler {
 func (h *UserHandler) GetUser(ctx *gin.Context) {
 	var params GetUserParams
 	if err := ctx.ShouldBindUri(&params); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Id"})
+
+		ctx.JSON(http.StatusBadRequest, utils.HandleValidationError(err))
 		return
 	}
 
