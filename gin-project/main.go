@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gin-project/internal/utils"
 	"gin-project/internal/v1/handler"
 
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,10 @@ import (
 
 func main() {
 	r := gin.Default()
+
+	if err := utils.RegisterCustomValidations(); err != nil {
+		panic(err)
+	}
 
 	v1 := r.Group("/api/v1")
 	{
@@ -19,6 +24,18 @@ func main() {
 			userGroup.POST("/", handler.CreateUser)
 			userGroup.PUT("/:id", handler.UpdateUser)
 			userGroup.DELETE("/:id", handler.DeleteUser)
+		}
+
+		categoryGroup := v1.Group("/categories")
+		{
+			handler := handler.NewCategoryHandler()
+			categoryGroup.GET("/:category", handler.GetCategory)
+		}
+
+		productGroup := v1.Group("/products")
+		{
+			handler := handler.NewProductHandler()
+			productGroup.GET("/", handler.GetProduct)
 		}
 	}
 	r.Run(":8080")

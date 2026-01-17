@@ -17,6 +17,10 @@ type GetUserParams struct {
 	ID int `uri:"id" binding:"gt=1"`
 }
 
+type GetUserBySlugParams struct {
+	Slug string `uri:"slug" binding:"slug,min=3,max=10"`
+}
+
 func NewUserHandler() *UserHandler {
 	return &UserHandler{}
 }
@@ -24,7 +28,6 @@ func NewUserHandler() *UserHandler {
 func (h *UserHandler) GetUser(ctx *gin.Context) {
 	var params GetUserParams
 	if err := ctx.ShouldBindUri(&params); err != nil {
-
 		ctx.JSON(http.StatusBadRequest, utils.HandleValidationError(err))
 		return
 	}
@@ -33,10 +36,9 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 }
 
 func (h *UserHandler) GetUserBySlug(ctx *gin.Context) {
-	slug := ctx.Param("slug")
-
-	if err := utils.RegexValidate("slug", slug, slugRegex); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var params GetUserBySlugParams
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.HandleValidationError(err))
 		return
 	}
 
