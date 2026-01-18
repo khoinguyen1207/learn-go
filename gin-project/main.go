@@ -36,6 +36,7 @@ func main() {
 		{
 			handler := handler.NewProductHandler()
 			productGroup.GET("/", handler.GetProduct)
+			productGroup.POST("/", handler.CreateProduct)
 		}
 	}
 	r.Run(":8080")
