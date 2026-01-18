@@ -2,7 +2,9 @@ package utils
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +22,7 @@ func RegexValidate(fieldName string, value string, re *regexp.Regexp) error {
 	if !re.MatchString(value) {
 		return fmt.Errorf("Invalid %s format", fieldName)
 	}
+
 	return nil
 }
 
@@ -42,6 +45,11 @@ func HandleValidationError(err error) gin.H {
 			case "oneof":
 				allowed := strings.Join(strings.Split(fieldErr.Param(), " "), ", ")
 				errors[fieldErr.Field()] = fmt.Sprintf("%s must be one of the following: %s", fieldErr.Field(), allowed)
+			case "min_int":
+				errors[fieldErr.Field()] = fmt.Sprintf("%s must be at least %s", fieldErr.Field(), fieldErr.Param())
+			case "file_ext":
+				allowed := strings.Join(strings.Split(fieldErr.Param(), " "), ",")
+				errors[fieldErr.Field()] = fmt.Sprintf("%s must have one of the following extensions: %s", fieldErr.Field(), allowed)
 			default:
 				errors[fieldErr.Field()] = fmt.Sprintf("%s is not valid", fieldErr.Field())
 			}
@@ -63,6 +71,37 @@ func RegisterCustomValidations() error {
 	v.RegisterValidation("slug", func(fl validator.FieldLevel) bool {
 		value := fl.Field().String()
 		return slugRegex.MatchString(value)
+	})
+
+	v.RegisterValidation("min_int", func(fl validator.FieldLevel) bool {
+		min, err := strconv.ParseInt(fl.Param(), 10, 64)
+		if err != nil {
+			return false
+		}
+		return fl.Field().Int() >= min
+	})
+
+	v.RegisterValidation("file_ext", func(fl validator.FieldLevel) bool {
+		filename := fl.Field().String()
+
+		allowedStr := fl.Param()
+		if allowedStr == "" {
+			return false
+		}
+		allowedExts := strings.Split(allowedStr, " ")
+		// filename = .png
+		// toLower = .png
+		// TrimPrefix = png
+		// allowedExts = [jpg, png, jpeg]
+		ext := strings.TrimPrefix(strings.ToLower(filepath.Ext(filename)), ".")
+
+		for _, allowed := range allowedExts {
+			if ext == strings.ToLower(allowed) {
+				return true
+			}
+		}
+
+		return false
 	})
 
 	return nil

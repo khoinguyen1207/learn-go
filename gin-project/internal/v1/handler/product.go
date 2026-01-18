@@ -18,13 +18,13 @@ type GetProductParams struct {
 }
 
 type ProductImage struct {
-	Name string `json:"name" binding:"required,min=3,max=100"`
+	Name string `json:"name" binding:"required,file_ext=jpg png jpeg"`
 	URL  string `json:"url" binding:"required,url"`
 }
 
 type CreateProductRequest struct {
 	Name     string       `json:"name" binding:"required,min=3,max=50"`
-	Price    int          `json:"price" binding:"required,gt=100"`
+	Price    int          `json:"price" binding:"required,min_int=100"`
 	IsActive *bool        `json:"is_active"`
 	Image    ProductImage `json:"image" binding:"required"`
 }
