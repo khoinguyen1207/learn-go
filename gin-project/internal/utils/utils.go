@@ -34,6 +34,8 @@ func HandleValidationError(err error) gin.H {
 			switch fieldErr.Tag() {
 			case "gt":
 				errors[fieldErr.Field()] = fmt.Sprintf("%s must be greater than %s", fieldErr.Field(), fieldErr.Param())
+			case "lt":
+				errors[fieldErr.Field()] = fmt.Sprintf("%s must be less than %s", fieldErr.Field(), fieldErr.Param())
 			case "required":
 				errors[fieldErr.Field()] = fmt.Sprintf("%s is required", fieldErr.Field())
 			case "slug":

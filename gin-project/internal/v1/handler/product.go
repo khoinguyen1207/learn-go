@@ -22,11 +22,18 @@ type ProductImage struct {
 	URL  string `json:"url" binding:"required,url"`
 }
 
+type ProductAttibute struct {
+	AttibuteName  string `json:"attribute_name" binding:"required"`
+	AttibuteValue string `json:"attribute_value" binding:"required"`
+}
+
 type CreateProductRequest struct {
-	Name     string       `json:"name" binding:"required,min=3,max=50"`
-	Price    int          `json:"price" binding:"required,min_int=100"`
-	IsActive *bool        `json:"is_active"`
-	Image    ProductImage `json:"image" binding:"required"`
+	Name       string            `json:"name" binding:"required,min=3,max=50"`
+	Price      int               `json:"price" binding:"required,min_int=100"`
+	IsActive   *bool             `json:"is_active"`
+	Image      ProductImage      `json:"image" binding:"required"`
+	Tags       []string          `json:"tags" binding:"required,gt=0,lt=5"`
+	Attributes []ProductAttibute `json:"attributes" binding:"required,gt=0,lt=5,dive"`
 }
 
 func NewProductHandler() *ProductHandler {
@@ -64,5 +71,15 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 		body.IsActive = &defaultActive
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"message": "Product created", "product": body})
+	ctx.JSON(http.StatusCreated, gin.H{
+		"message": "Product created",
+		"product": gin.H{
+			"name":       body.Name,
+			"price":      body.Price,
+			"is_active":  *body.IsActive,
+			"image":      body.Image,
+			"tags":       body.Tags,
+			"attributes": body.Attributes,
+		},
+	})
 }
