@@ -27,13 +27,19 @@ type ProductAttibute struct {
 	AttibuteValue string `json:"attribute_value" binding:"required"`
 }
 
+type ProductMetadata struct {
+	Key   string `json:"key" binding:"required"`
+	Value string `json:"value" binding:"required"`
+}
+
 type CreateProductRequest struct {
-	Name       string            `json:"name" binding:"required,min=3,max=50"`
-	Price      int               `json:"price" binding:"required,min_int=100"`
-	IsActive   *bool             `json:"is_active"`
-	Image      ProductImage      `json:"image" binding:"required"`
-	Tags       []string          `json:"tags" binding:"required,gt=0,lt=5"`
-	Attributes []ProductAttibute `json:"attributes" binding:"required,gt=0,lt=5,dive"`
+	Name            string                     `json:"name" binding:"required,min=3,max=50"`
+	Price           int                        `json:"price" binding:"required,min_int=100"`
+	IsActive        *bool                      `json:"is_active"`
+	Image           ProductImage               `json:"image" binding:"required"`
+	Tags            []string                   `json:"tags" binding:"required,gt=0,lt=5"`
+	Attributes      []ProductAttibute          `json:"attributes" binding:"required,gt=0,lt=5,dive"`
+	ProductMetadata map[string]ProductMetadata `json:"product_metadata" binding:"required,gt=0,dive"`
 }
 
 func NewProductHandler() *ProductHandler {
@@ -71,6 +77,13 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 		body.IsActive = &defaultActive
 	}
 
+	for key := range body.ProductMetadata {
+		if !utils.IsValidUUID(key) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Product metadata keys must be valid UUIDs"})
+			return
+		}
+	}
+
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "Product created",
 		"product": gin.H{
@@ -80,6 +93,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 			"image":      body.Image,
 			"tags":       body.Tags,
 			"attributes": body.Attributes,
+			"metadata":   body.ProductMetadata,
 		},
 	})
 }
