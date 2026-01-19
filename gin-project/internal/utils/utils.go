@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -104,6 +105,15 @@ func RegisterCustomValidations() error {
 		}
 
 		return false
+	})
+
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		fmt.Println("Field name:", name)
+		if name == "-" {
+			return ""
+		}
+		return name
 	})
 
 	return nil
