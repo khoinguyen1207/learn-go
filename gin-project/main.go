@@ -38,6 +38,12 @@ func main() {
 			productGroup.GET("/", handler.GetProduct)
 			productGroup.POST("/", handler.CreateProduct)
 		}
+
+		newsGroup := v1.Group("/news")
+		{
+			handler := handler.NewNewsHandler()
+			newsGroup.POST("/", handler.CreateNews)
+		}
 	}
 	r.Run(":8080")
 }
