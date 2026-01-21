@@ -3,12 +3,18 @@ package main
 import (
 	"gin-project/internal/utils"
 	"gin-project/internal/v1/handler"
+	"gin-project/middlewares"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	r := gin.Default()
+
+	if err := godotenv.Load(); err != nil {
+		panic("Error loading .env file")
+	}
 
 	if err := utils.RegisterCustomValidations(); err != nil {
 		panic(err)
@@ -29,7 +35,7 @@ func main() {
 		categoryGroup := v1.Group("/categories")
 		{
 			handler := handler.NewCategoryHandler()
-			categoryGroup.GET("/:category", handler.GetCategory)
+			categoryGroup.GET("/:category", middlewares.ApiKeyMiddleware(), handler.GetCategory)
 		}
 
 		productGroup := v1.Group("/products")
