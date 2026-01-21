@@ -43,6 +43,7 @@ func main() {
 		{
 			handler := handler.NewNewsHandler()
 			newsGroup.POST("/", handler.CreateNews)
+			newsGroup.POST("/upload", handler.UploadNewsImage)
 		}
 	}
 	r.Run(":8080")

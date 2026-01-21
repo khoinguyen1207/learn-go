@@ -2,13 +2,15 @@ package handler
 
 import (
 	"gin-project/internal/utils"
-	"os"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type NewsHandler struct {
 }
+
+var UPLOAD_DIR = "./uploads/"
 
 func NewNewsHandler() *NewsHandler {
 	return &NewsHandler{}
@@ -21,29 +23,25 @@ type CreateNewsRequest struct {
 func (h *NewsHandler) CreateNews(ctx *gin.Context) {
 	var params CreateNewsRequest
 	if err := ctx.ShouldBind(&params); err != nil {
-		ctx.JSON(400, utils.HandleValidationError(err))
+		ctx.JSON(http.StatusBadGateway, utils.HandleValidationError(err))
 		return
 	}
 
+	ctx.JSON(http.StatusCreated, gin.H{"message": "News created", "title": params.Title})
+}
+
+func (h *NewsHandler) UploadNewsImage(ctx *gin.Context) {
 	file, err := ctx.FormFile("image")
 	if err != nil {
-		ctx.JSON(400, gin.H{"error": gin.H{"image": "Image is required"}})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Image is required"})
 		return
 	}
 
-	dir := "./uploads/"
-
-	err = os.MkdirAll(dir, os.ModePerm)
+	filename, err := utils.UploadSingleFile(file, UPLOAD_DIR)
 	if err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to create upload directory"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	dst := dir + file.Filename
-	if err := ctx.SaveUploadedFile(file, dst); err != nil {
-		ctx.JSON(500, gin.H{"error": "Failed to save uploaded file"})
-		return
-	}
-
-	ctx.JSON(201, gin.H{"message": "News created", "title": params.Title})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Upload successful", "filename": filename, "url": "/uploads/" + filename})
 }
