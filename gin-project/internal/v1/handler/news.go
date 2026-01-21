@@ -11,6 +11,7 @@ type NewsHandler struct {
 }
 
 var UPLOAD_DIR = "./uploads/"
+var URL = "http://localhost:8080"
 
 func NewNewsHandler() *NewsHandler {
 	return &NewsHandler{}
@@ -72,9 +73,11 @@ func (h *NewsHandler) UploadMultipleNewsImages(ctx *gin.Context) {
 			})
 			continue
 		}
-		successfulUploads = append(successfulUploads, fileName)
+		imageUrl := URL + "/images/" + fileName
+		successfulUploads = append(successfulUploads, imageUrl)
 
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message":            "Upload multiple news images endpoint",
 		"successful_uploads": successfulUploads,

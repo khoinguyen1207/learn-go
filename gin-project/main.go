@@ -47,5 +47,8 @@ func main() {
 			newsGroup.POST("/upload-multiple", handler.UploadMultipleNewsImages)
 		}
 	}
+
+	r.StaticFS("/images", gin.Dir("./uploads", false))
+
 	r.Run(":8080")
 }
