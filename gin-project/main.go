@@ -44,6 +44,7 @@ func main() {
 			handler := handler.NewNewsHandler()
 			newsGroup.POST("/", handler.CreateNews)
 			newsGroup.POST("/upload", handler.UploadNewsImage)
+			newsGroup.POST("/upload-multiple", handler.UploadMultipleNewsImages)
 		}
 	}
 	r.Run(":8080")

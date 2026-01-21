@@ -37,11 +37,47 @@ func (h *NewsHandler) UploadNewsImage(ctx *gin.Context) {
 		return
 	}
 
-	filename, err := utils.UploadSingleFile(file, UPLOAD_DIR)
+	filename, err := utils.HandleUploadImage(file, UPLOAD_DIR)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Upload successful", "filename": filename, "url": "/uploads/" + filename})
+}
+
+func (h *NewsHandler) UploadMultipleNewsImages(ctx *gin.Context) {
+	form, err := ctx.MultipartForm()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Images are required"})
+		return
+	}
+
+	files := form.File["images"]
+
+	if len(files) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "At least one image is required"})
+		return
+	}
+
+	successfulUploads := []string{}
+	failedUploads := []map[string]string{}
+
+	for _, file := range files {
+		fileName, err := utils.HandleUploadImage(file, UPLOAD_DIR)
+		if err != nil {
+			failedUploads = append(failedUploads, map[string]string{
+				"filename": file.Filename,
+				"error":    err.Error(),
+			})
+			continue
+		}
+		successfulUploads = append(successfulUploads, fileName)
+
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":            "Upload multiple news images endpoint",
+		"successful_uploads": successfulUploads,
+		"failed_uploads":     failedUploads,
+	})
 }

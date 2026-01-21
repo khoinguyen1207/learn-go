@@ -21,9 +21,9 @@ var mimeTypes = map[string]bool{
 	"image/jpeg": true,
 	"image/png":  true,
 }
-var MAX_FILE_SIZE int64 = 1 * 1024 * 1024 // 1MB
+var MAX_FILE_SIZE int64 = 3 * 1024 * 1024 // 3MB
 
-func UploadSingleFile(fileHeader *multipart.FileHeader, uploadDir string) (string, error) {
+func HandleUploadImage(fileHeader *multipart.FileHeader, uploadDir string) (string, error) {
 	// Validate file extension
 	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
 	if !allowedExts[ext] {
