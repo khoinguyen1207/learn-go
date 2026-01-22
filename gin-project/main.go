@@ -1,9 +1,9 @@
 package main
 
 import (
-	"gin-project/internal/utils"
 	"gin-project/internal/v1/handler"
 	"gin-project/middlewares"
+	"gin-project/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

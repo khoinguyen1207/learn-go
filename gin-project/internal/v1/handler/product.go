@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"gin-project/internal/utils"
+	"gin-project/utils"
 	"net/http"
 	"time"
 
