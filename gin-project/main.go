@@ -16,6 +16,10 @@ func main() {
 		panic("Error loading .env file")
 	}
 
+	go middlewares.CleanupClients()
+
+	r.Use(middlewares.RateLimiting)
+
 	if err := utils.RegisterCustomValidations(); err != nil {
 		panic(err)
 	}
