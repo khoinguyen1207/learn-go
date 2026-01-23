@@ -1,0 +1,35 @@
+{
+  "level": "warn",
+  "method": "GET",
+  "path": "/api/v1/categories/books",
+  "client_ip": "::1",
+  "query": "",
+  "user_agent": "PostmanRuntime/7.51.0",
+  "referer": "",
+  "protocol": "HTTP/1.1",
+  "host": "localhost:8080",
+  "remote_addr": "[::1]:60397",
+  "request_uri": "/api/v1/categories/books",
+  "content_length": 0,
+  "headers": {
+    "Accept": [
+      "*/*"
+    ],
+    "Accept-Encoding": [
+      "gzip, deflate, br"
+    ],
+    "Connection": [
+      "keep-alive"
+    ],
+    "Postman-Token": [
+      "d80c0bda-df8e-4af6-97d1-23f9453a662c"
+    ],
+    "User-Agent": [
+      "PostmanRuntime/7.51.0"
+    ]
+  },
+  "status": 401,
+  "duration_ms": 0,
+  "time": "2026-01-24T00:15:59+07:00",
+  "message": "HTTP request logged"
+}

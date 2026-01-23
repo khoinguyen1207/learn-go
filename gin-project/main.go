@@ -18,7 +18,7 @@ func main() {
 
 	go middlewares.CleanupClients()
 
-	r.Use(middlewares.RateLimiting)
+	r.Use(middlewares.RateLimiting, middlewares.LoggerMiddleware())
 
 	if err := utils.RegisterCustomValidations(); err != nil {
 		panic(err)
