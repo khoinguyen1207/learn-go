@@ -14,6 +14,16 @@ import (
 	"github.com/rs/zerolog"
 )
 
+type CustomResponseWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
+func (w *CustomResponseWriter) Write(data []byte) (n int, err error) {
+	w.body.Write(data)
+	return w.ResponseWriter.Write(data)
+}
+
 func LoggerMiddleware() gin.HandlerFunc {
 	logPath := "logs/app.log"
 
@@ -87,7 +97,30 @@ func LoggerMiddleware() gin.HandlerFunc {
 			}
 		}
 
+		customWriter := &CustomResponseWriter{
+			ResponseWriter: c.Writer,
+			body:           bytes.NewBufferString(""),
+		}
+
+		c.Writer = customWriter
+
 		c.Next()
+
+		responseBodyRaw := customWriter.body.String()
+		var responseBodyParsed any
+
+		responseContentType := c.Writer.Header().Get("Content-Type")
+		if strings.HasPrefix(responseContentType, "application/json") ||
+			strings.HasPrefix(strings.TrimSpace(responseBodyRaw), "{") ||
+			strings.HasPrefix(strings.TrimSpace(responseBodyRaw), "[") {
+			if err := json.Unmarshal([]byte(responseBodyRaw), &responseBodyParsed); err != nil {
+				responseBodyParsed = responseBodyRaw
+			}
+		} else if strings.HasPrefix(responseContentType, "image/") {
+			responseBodyParsed = "[binary data]"
+		} else {
+			responseBodyParsed = responseBodyRaw
+		}
 
 		status_code := c.Writer.Status()
 		logEvent := logger.Info()
@@ -106,7 +139,8 @@ func LoggerMiddleware() gin.HandlerFunc {
 			Str("request_uri", c.Request.RequestURI).
 			Str("content-type", c.GetHeader("Content-Type")).
 			Interface("headers", c.Request.Header).
-			Interface("body", request_body).
+			Interface("request_body", request_body).
+			Interface("response_body", responseBodyParsed).
 			Int("status", c.Writer.Status()).
 			Int64("duration_ms", duration.Milliseconds()).
 			Msg("HTTP request logged")

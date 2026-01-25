@@ -1,11 +1,11 @@
 {
   "level": "info",
-  "method": "POST",
-  "path": "/api/v1/news/upload",
+  "method": "GET",
+  "path": "/images/b5dff7f2-439c-4506-a858-1c0a6f6bdf4a.jpeg",
   "query": "",
   "host": "localhost:8080",
-  "request_uri": "/api/v1/news/upload",
-  "content-type": "multipart/form-data; boundary=--------------------------953908297060212844989331",
+  "request_uri": "/images/b5dff7f2-439c-4506-a858-1c0a6f6bdf4a.jpeg",
+  "content-type": "",
   "headers": {
     "Accept": [
       "*/*"
@@ -16,32 +16,17 @@
     "Connection": [
       "keep-alive"
     ],
-    "Content-Length": [
-      "26398"
-    ],
-    "Content-Type": [
-      "multipart/form-data; boundary=--------------------------953908297060212844989331"
-    ],
     "Postman-Token": [
-      "57b54214-8683-497e-919b-5bd6e6e065a0"
+      "117c5f41-a4cc-4b18-864f-05a569b97f57"
     ],
     "User-Agent": [
       "PostmanRuntime/7.51.0"
     ]
   },
-  "body": {
-    "files": [
-      {
-        "file_name": "Funny Corgi Faces.jpeg",
-        "file_size": 26070,
-        "form_field": "image",
-        "mime_type": "image/jpeg"
-      }
-    ],
-    "test": "mjsa"
-  },
+  "request_body": {},
+  "response_body": "[binary data]",
   "status": 200,
-  "duration_ms": 0,
-  "time": "2026-01-25T12:02:13+07:00",
+  "duration_ms": 4,
+  "time": "2026-01-26T00:09:02+07:00",
   "message": "HTTP request logged"
 }
