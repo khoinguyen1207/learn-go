@@ -61,7 +61,7 @@ func HandleValidationError(err error) gin.H {
 		return gin.H{"error": errors}
 	}
 
-	return gin.H{"error": err.Error()}
+	return gin.H{"error": fmt.Sprintf("Validation error: %s", err.Error())}
 }
 
 func RegisterCustomValidations() error {
@@ -109,7 +109,6 @@ func RegisterCustomValidations() error {
 
 	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-		fmt.Println("Field name:", name)
 		if name == "-" {
 			return ""
 		}
