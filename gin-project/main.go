@@ -18,7 +18,7 @@ func main() {
 
 	go middlewares.CleanupClients()
 
-	r.Use(middlewares.RateLimiting, middlewares.LoggerMiddleware())
+	r.Use(middlewares.LoggerMiddleware(), middlewares.RateLimiting)
 
 	if err := utils.RegisterCustomValidations(); err != nil {
 		panic(err)
@@ -39,7 +39,7 @@ func main() {
 		categoryGroup := v1.Group("/categories")
 		{
 			handler := handler.NewCategoryHandler()
-			categoryGroup.GET("/:category", middlewares.ApiKeyMiddleware(), handler.GetCategory)
+			categoryGroup.GET("/:category", handler.GetCategory)
 		}
 
 		productGroup := v1.Group("/products")

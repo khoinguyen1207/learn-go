@@ -5,13 +5,12 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type CustomResponseWriter struct {
@@ -27,19 +26,14 @@ func (w *CustomResponseWriter) Write(data []byte) (n int, err error) {
 func LoggerMiddleware() gin.HandlerFunc {
 	logPath := "logs/app.log"
 
-	// Create log directory if it doesn't exist
-	err := os.MkdirAll(filepath.Dir(logPath), os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-
-	// Open log file
-	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	logger := zerolog.New(logFile).With().Timestamp().Logger()
+	logger := zerolog.New(&lumberjack.Logger{
+		Filename:   logPath,
+		MaxSize:    1, // megabytes
+		MaxBackups: 3,
+		MaxAge:     7, //days
+		Compress:   true,
+		LocalTime:  true,
+	}).With().Timestamp().Logger()
 
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -106,10 +100,10 @@ func LoggerMiddleware() gin.HandlerFunc {
 
 		c.Next()
 
+		responseContentType := c.Writer.Header().Get("Content-Type")
 		responseBodyRaw := customWriter.body.String()
 		var responseBodyParsed any
 
-		responseContentType := c.Writer.Header().Get("Content-Type")
 		if strings.HasPrefix(responseContentType, "application/json") ||
 			strings.HasPrefix(strings.TrimSpace(responseBodyRaw), "{") ||
 			strings.HasPrefix(strings.TrimSpace(responseBodyRaw), "[") {
