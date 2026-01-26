@@ -2,6 +2,7 @@ package student
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/khoinguyen/learn-go/cms/utils"
 )
@@ -76,15 +77,24 @@ func deleteStudent() {
 	fmt.Println("=== Delete Student ===")
 	id := utils.GetPositiveInt("Id: ")
 
-	for index, student := range students {
-		if student.Id == id {
-			students = append(students[:index], students[index+1:]...)
-
-			fmt.Println("Delete student successfully!")
-			return
-		}
+	i := slices.IndexFunc(students, func(s Student) bool { return s.Id == id })
+	if i < 0 {
+		fmt.Println("Student not found")
+		return
 	}
-	fmt.Println("Student not found")
+
+	students = slices.Delete(students, i, i+1)
+	fmt.Println("Delete student successfully!")
+
+	// for index, student := range students {
+	// 	if student.Id == id {
+	// 		students = append(students[:index], students[index+1:]...)
+
+	// 		fmt.Println("Delete student successfully!")
+	// 		return
+	// 	}
+	// }
+	// fmt.Println("Student not found")
 }
 
 func listStudent() {
