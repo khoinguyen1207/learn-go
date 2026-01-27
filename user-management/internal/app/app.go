@@ -5,6 +5,7 @@ import (
 	"user-management/internal/routes"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type Module interface {
@@ -12,22 +13,26 @@ type Module interface {
 }
 
 type Application struct {
-	config *config.Config
-	router *gin.Engine
+	config  *config.Config
+	router  *gin.Engine
+	modules []Module
 }
 
 func NewApplication(cfg *config.Config) *Application {
 	r := gin.Default()
 
+	loadEnv()
+
 	modules := []Module{
 		NewUserModule(),
 	}
 
-	routes.RegisterRoutes(r, getmModuleRoutes(modules)...)
+	routes.RegisterRoutes(r, getModuleRoutes(modules)...)
 
 	return &Application{
-		config: cfg,
-		router: r,
+		config:  cfg,
+		router:  r,
+		modules: modules,
 	}
 }
 
@@ -35,7 +40,7 @@ func (app *Application) Run() error {
 	return app.router.Run(app.config.Port)
 }
 
-func getmModuleRoutes(modules []Module) []routes.Route {
+func getModuleRoutes(modules []Module) []routes.Route {
 	routeList := make([]routes.Route, len(modules))
 
 	for i, module := range modules {
@@ -43,4 +48,10 @@ func getmModuleRoutes(modules []Module) []routes.Route {
 	}
 
 	return routeList
+}
+
+func loadEnv() {
+	if err := godotenv.Load(); err != nil {
+		panic("Error loading .env file")
+	}
 }
