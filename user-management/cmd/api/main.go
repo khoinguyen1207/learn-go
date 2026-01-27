@@ -1,31 +1,20 @@
 package main
 
 import (
+	"user-management/internal/app"
 	"user-management/internal/config"
-	"user-management/internal/handler"
-	"user-management/internal/repository"
-	"user-management/internal/routes"
-	"user-management/internal/service"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
+	// Initialize configuration
 	cfg := config.NewConfig()
 
-	userRepository := repository.NewUserRepository()
+	// Initialize application
+	application := app.NewApplication(cfg)
 
-	userService := service.NewUserService(userRepository)
-
-	userHandler := handler.NewUserHandler(userService)
-
-	userRoutes := routes.NewUserRoutes(userHandler)
-
-	r := gin.Default()
-
-	routes.RegisterRoutes(r, userRoutes)
-
-	if err := r.Run(cfg.Port); err != nil {
+	// Run the application
+	if err := application.Run(); err != nil {
 		panic(err)
 	}
 }
