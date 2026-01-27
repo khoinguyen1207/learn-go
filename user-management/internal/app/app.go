@@ -1,8 +1,10 @@
 package app
 
 import (
+	"log"
 	"user-management/internal/config"
 	"user-management/internal/routes"
+	"user-management/internal/validation"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -20,6 +22,10 @@ type Application struct {
 
 func NewApplication(cfg *config.Config) *Application {
 	r := gin.Default()
+
+	if err := validation.InitValidator(); err != nil {
+		log.Fatal("Failed to initialize validator:", err)
+	}
 
 	loadEnv()
 
