@@ -1,7 +1,6 @@
 package service
 
 import (
-	"log"
 	"user-management/internal/model"
 	"user-management/internal/repository"
 	"user-management/internal/utils"
@@ -19,10 +18,14 @@ func NewUserService(repo repository.UserRepository) UserService {
 	}
 }
 
-func (us *userService) GetUsers() {
-	log.Println("Service: GetUsers called")
-	us.repo.FindAll()
+func (us *userService) GetUsers() ([]model.User, error) {
+	users, err := us.repo.FindAll()
+	if err != nil {
+		return nil, utils.WrapError(err, "Failed to get users", utils.CodeInternalServerError)
+	}
+	return users, nil
 }
+
 func (us *userService) CreateUser(user model.User) (model.User, error) {
 	user.Email = utils.NormalizeString(user.Email)
 
@@ -44,12 +47,19 @@ func (us *userService) CreateUser(user model.User) (model.User, error) {
 
 	return user, nil
 }
-func (us *userService) GetUserByID() {
 
+func (us *userService) GetUserByID(id string) (model.User, error) {
+	user, exist := us.repo.FindById(id)
+	if !exist {
+		return model.User{}, utils.NewError("User not found", utils.CodeNotFound)
+	}
+	return user, nil
 }
+
 func (us *userService) UpdateUser() {
 
 }
+
 func (us *userService) DeleteUser() {
 
 }

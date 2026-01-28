@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"net/http"
+	"user-management/internal/dto"
 	"user-management/internal/model"
+	"user-management/internal/request"
 	"user-management/internal/response"
 	"user-management/internal/service"
 	"user-management/internal/validation"
@@ -21,12 +22,21 @@ func NewUserHandler(service service.UserService) *UserHandler {
 }
 
 func (uh *UserHandler) GetUsers(ctx *gin.Context) {
-	uh.service.GetUsers()
+	users, err := uh.service.GetUsers()
+	if err != nil {
+		response.ErrorResponse(ctx, err)
+		return
+	}
+
+	usersDto := dto.MapUsersToDto(users)
+
+	response.SuccessResponse(ctx, "Get users successfully", usersDto)
 }
+
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 	var body model.User
 	if err := ctx.ShouldBindJSON(&body); err != nil {
-		ctx.JSON(http.StatusBadRequest, validation.HandleValidationError(err))
+		response.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
 	}
 
@@ -36,11 +46,29 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	response.SuccessResponse(ctx, "User created successfully", createdUser)
-}
-func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
+	userDto := dto.MapToUserDTO(createdUser)
 
+	response.SuccessResponse(ctx, "User created successfully", &userDto)
 }
+
+func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
+	var params request.GetUserByIdParams
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		response.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
+
+	user, err := uh.service.GetUserByID(params.ID)
+	if err != nil {
+		response.ErrorResponse(ctx, err)
+		return
+	}
+
+	userDto := dto.MapToUserDTO(user)
+
+	response.SuccessResponse(ctx, "Get user successfully", &userDto)
+}
+
 func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
 
 }

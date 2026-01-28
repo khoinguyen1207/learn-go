@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"log"
 	"user-management/internal/model"
 )
 
@@ -15,9 +14,8 @@ func NewUserRepository() UserRepository {
 	}
 }
 
-func (ur *userRepository) FindAll() {
-	log.Println("Repository: FindAll called")
-
+func (ur *userRepository) FindAll() ([]model.User, error) {
+	return ur.users, nil
 }
 
 func (ur *userRepository) Create(user model.User) error {
@@ -25,8 +23,13 @@ func (ur *userRepository) Create(user model.User) error {
 	return nil
 }
 
-func (ur *userRepository) FindById() {
-
+func (ur *userRepository) FindById(id string) (model.User, bool) {
+	for _, user := range ur.users {
+		if user.ID == id {
+			return user, true
+		}
+	}
+	return model.User{}, false
 }
 
 func (ur *userRepository) Update() {

@@ -6,16 +6,54 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"user-management/internal/utils"
 
 	"github.com/go-playground/validator/v10"
 )
 
+var (
+	slugRegex           = regexp.MustCompile("^[a-z0-9]+(?:-[a-z0-9]+)*$")
+	blockedDomainEmails = map[string]bool{
+		"spam.com":     true,
+		"edu.vn":       true,
+		"tempmail.com": true,
+	}
+)
+
 func RegisterCustomValidations(v *validator.Validate) {
 	// Slug validation: lowercase letters, numbers, hyphens, no spaces, no special characters
-	slugRegex := regexp.MustCompile("^[a-z0-9]+(?:-[a-z0-9]+)*$")
 	v.RegisterValidation("slug", func(fl validator.FieldLevel) bool {
 		value := fl.Field().String()
 		return slugRegex.MatchString(value)
+	})
+
+	// Advanced email validation: check for blocked domains
+	v.RegisterValidation("email_advanced", func(fl validator.FieldLevel) bool {
+		email := fl.Field().String()
+
+		parts := strings.Split(email, "@")
+		if len(parts) != 2 {
+			return false
+		}
+
+		domain := utils.NormalizeString(parts[1])
+
+		return !blockedDomainEmails[domain]
+	})
+
+	v.RegisterValidation("strong_password", func(fl validator.FieldLevel) bool {
+		password := fl.Field().String()
+
+		if len(password) < 8 {
+			return false
+		}
+
+		hasLower := regexp.MustCompile(`[a-z]`).MatchString(password)
+		hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(password)
+		hasNumber := regexp.MustCompile(`[0-9]`).MatchString(password)
+		hasSpecial := regexp.MustCompile(`[!@#~$%^&*()+|_]{1,}`).MatchString(password)
+
+		return hasLower && hasUpper && hasNumber && hasSpecial
 	})
 
 	// Minimum integer value validation

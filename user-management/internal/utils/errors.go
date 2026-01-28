@@ -8,7 +8,7 @@ type AppError struct {
 
 type ErrorResponseCode string
 
-var (
+const (
 	CodeBadRequest          ErrorResponseCode = "BAD_REQUEST"
 	CodeUnauthorized        ErrorResponseCode = "UNAUTHORIZED"
 	CodeForbidden           ErrorResponseCode = "FORBIDDEN"
