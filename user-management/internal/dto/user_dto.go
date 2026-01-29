@@ -11,6 +11,25 @@ type UserDTO struct {
 	Level  string `json:"level"`
 }
 
+type GetUserByIdParams struct {
+	ID string `uri:"id" binding:"required,uuid"`
+}
+
+type GetUsersParams struct {
+	Search string `form:"search" binding:"omitempty,min=3,max=100"`
+	Page   int    `form:"page" binding:"omitempty,gte=1"`
+	Limit  int    `form:"limit" binding:"omitempty,gte=1,lte=100"`
+}
+
+type UpdateUserParams struct {
+	Name     string `json:"name" binding:"omitempty,min=3,max=100"`
+	Email    string `json:"email" binding:"omitempty,email,email_advanced"`
+	Password string `json:"password" binding:"omitempty,strong_password"`
+	Age      int    `json:"age" binding:"omitempty,gt=0,lte=130"`
+	Status   int    `json:"status" binding:"omitempty,oneof=1 2"`
+	Level    int    `json:"level" binding:"omitempty,oneof=1 2"`
+}
+
 func MapToUserDTO(user model.User) *UserDTO {
 	return &UserDTO{
 		Id:     user.ID,

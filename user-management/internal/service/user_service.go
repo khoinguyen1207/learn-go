@@ -83,8 +83,35 @@ func (us *userService) GetUserByID(id string) (model.User, error) {
 	return user, nil
 }
 
-func (us *userService) UpdateUser() {
+func (us *userService) UpdateUser(id string, data model.User) (model.User, error) {
+	currentUser, exist := us.repo.FindById(id)
+	if !exist {
+		return model.User{}, utils.NewError("User not found", utils.CodeNotFound)
+	}
 
+	if u, emailExist := us.repo.FindByEmail(data.Email); emailExist && currentUser.ID != u.ID {
+		return model.User{}, utils.NewError("Email already exists", utils.CodeBadRequest)
+	}
+
+	currentUser.Name = data.Name
+	currentUser.Email = utils.NormalizeString(data.Email)
+	currentUser.Age = data.Age
+	currentUser.Status = data.Status
+	currentUser.Level = data.Level
+
+	if data.Password != "" {
+		hashedPassword, err := utils.HashPassword(data.Password)
+		if err != nil {
+			return model.User{}, utils.WrapError(err, "Failed to hash password", utils.CodeBadRequest)
+		}
+		currentUser.Password = string(hashedPassword)
+	}
+
+	if err := us.repo.Update(id, currentUser); err != nil {
+		return model.User{}, utils.WrapError(err, "Failed to update user", utils.CodeInternalServerError)
+	}
+
+	return currentUser, nil
 }
 
 func (us *userService) DeleteUser() {

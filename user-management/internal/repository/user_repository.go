@@ -32,8 +32,14 @@ func (ur *userRepository) FindById(id string) (model.User, bool) {
 	return model.User{}, false
 }
 
-func (ur *userRepository) Update() {
-
+func (ur *userRepository) Update(id string, updatedUser model.User) error {
+	for i, user := range ur.users {
+		if user.ID == id {
+			ur.users[i] = updatedUser
+			return nil
+		}
+	}
+	return nil
 }
 
 func (ur *userRepository) Delete() {

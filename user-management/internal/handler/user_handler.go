@@ -3,7 +3,6 @@ package handler
 import (
 	"user-management/internal/dto"
 	"user-management/internal/model"
-	"user-management/internal/request"
 	"user-management/internal/response"
 	"user-management/internal/service"
 	"user-management/internal/validation"
@@ -22,7 +21,7 @@ func NewUserHandler(service service.UserService) *UserHandler {
 }
 
 func (uh *UserHandler) GetUsers(ctx *gin.Context) {
-	var params request.GetUsersParams
+	var params dto.GetUsersParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		response.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
@@ -66,7 +65,7 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
-	var params request.GetUserByIdParams
+	var params dto.GetUserByIdParams
 	if err := ctx.ShouldBindUri(&params); err != nil {
 		response.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
@@ -84,6 +83,36 @@ func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
+	var uriParams dto.GetUserByIdParams
+	if err := ctx.ShouldBindUri(&uriParams); err != nil {
+		response.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
+
+	var body dto.UpdateUserParams
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		response.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
+
+	userToUpdate := model.User{
+		Name:     body.Name,
+		Email:    body.Email,
+		Password: body.Password,
+		Age:      body.Age,
+		Status:   body.Status,
+		Level:    body.Level,
+	}
+
+	updatedUser, err := uh.service.UpdateUser(uriParams.ID, userToUpdate)
+	if err != nil {
+		response.ErrorResponse(ctx, err)
+		return
+	}
+
+	userDto := dto.MapToUserDTO(updatedUser)
+
+	response.SuccessResponse(ctx, "User updated successfully", &userDto)
 
 }
 func (uh *UserHandler) DeleteUser(ctx *gin.Context) {
