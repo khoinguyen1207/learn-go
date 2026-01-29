@@ -15,6 +15,7 @@ const (
 	CodeNotFound            ErrorResponseCode = "NOT_FOUND"
 	CodeConflict            ErrorResponseCode = "CONFLICT"
 	CodeInternalServerError ErrorResponseCode = "INTERNAL_SERVER_ERROR"
+	CodeValidationError     ErrorResponseCode = "VALIDATION_ERROR"
 )
 
 func (e *AppError) Error() string {

@@ -22,7 +22,21 @@ func NewUserHandler(service service.UserService) *UserHandler {
 }
 
 func (uh *UserHandler) GetUsers(ctx *gin.Context) {
-	users, err := uh.service.GetUsers()
+	var params request.GetUsersParams
+	if err := ctx.ShouldBindQuery(&params); err != nil {
+		response.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
+
+	if params.Page == 0 {
+		params.Page = 1
+	}
+
+	if params.Limit == 0 {
+		params.Limit = 10
+	}
+
+	users, err := uh.service.GetUsers(params.Search, params.Page, params.Limit)
 	if err != nil {
 		response.ErrorResponse(ctx, err)
 		return

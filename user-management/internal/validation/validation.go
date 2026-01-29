@@ -62,5 +62,5 @@ func HandleValidationError(err error) map[string]string {
 		return errors
 	}
 
-	return map[string]string{"error": err.Error()}
+	return map[string]string{"detail": err.Error()}
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"strings"
 	"user-management/internal/model"
 	"user-management/internal/repository"
 	"user-management/internal/utils"
@@ -18,12 +19,38 @@ func NewUserService(repo repository.UserRepository) UserService {
 	}
 }
 
-func (us *userService) GetUsers() ([]model.User, error) {
+func (us *userService) GetUsers(search string, page, limit int) ([]model.User, error) {
 	users, err := us.repo.FindAll()
 	if err != nil {
 		return nil, utils.WrapError(err, "Failed to get users", utils.CodeInternalServerError)
 	}
-	return users, nil
+
+	filteredUsers := []model.User{}
+
+	if search != "" {
+		for _, user := range users {
+			email := utils.NormalizeString(user.Email)
+			name := utils.NormalizeString(user.Name)
+
+			if strings.Contains(email, search) || strings.Contains(name, search) {
+				filteredUsers = append(filteredUsers, user)
+			}
+		}
+	} else {
+		filteredUsers = users
+	}
+
+	start := (page - 1) * limit
+	end := start + limit
+
+	if start >= len(filteredUsers) {
+		return []model.User{}, nil
+	}
+	if end > len(filteredUsers) {
+		end = len(filteredUsers)
+	}
+
+	return filteredUsers[start:end], nil
 }
 
 func (us *userService) CreateUser(user model.User) (model.User, error) {

@@ -47,7 +47,7 @@ func SuccessResponse(ctx *gin.Context, message string, data any, status ...int) 
 func ValidationResponse(ctx *gin.Context, err any) {
 	ctx.JSON(http.StatusBadRequest, gin.H{
 		"message": "Validation Error",
-		"code":    utils.CodeBadRequest,
+		"code":    utils.CodeValidationError,
 		"errors":  err,
 	})
 }
