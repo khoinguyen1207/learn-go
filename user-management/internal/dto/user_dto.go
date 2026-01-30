@@ -21,13 +21,44 @@ type GetUsersParams struct {
 	Limit  int    `form:"limit" binding:"omitempty,gte=1,lte=100"`
 }
 
+type CreateUserParams struct {
+	Name     string `json:"name" binding:"required,min=3,max=100"`
+	Email    string `json:"email" binding:"required,email,email_advanced"`
+	Password string `json:"password" binding:"required,strong_password"`
+	Age      int    `json:"age" binding:"required,gt=0,lte=130"`
+	Status   int    `json:"status" binding:"required,oneof=1 2"`
+	Level    int    `json:"level" binding:"required,oneof=1 2"`
+}
+
 type UpdateUserParams struct {
-	Name     string `json:"name" binding:"omitempty,min=3,max=100"`
-	Email    string `json:"email" binding:"omitempty,email,email_advanced"`
+	Name     string `json:"name" binding:"required,min=3,max=100"`
+	Email    string `json:"email" binding:"required,email,email_advanced"`
 	Password string `json:"password" binding:"omitempty,strong_password"`
-	Age      int    `json:"age" binding:"omitempty,gt=0,lte=130"`
-	Status   int    `json:"status" binding:"omitempty,oneof=1 2"`
-	Level    int    `json:"level" binding:"omitempty,oneof=1 2"`
+	Age      int    `json:"age" binding:"required,gt=0,lte=130"`
+	Status   int    `json:"status" binding:"required,oneof=1 2"`
+	Level    int    `json:"level" binding:"required,oneof=1 2"`
+}
+
+func (p *CreateUserParams) ToModel() model.User {
+	return model.User{
+		Name:     p.Name,
+		Email:    p.Email,
+		Password: p.Password,
+		Age:      p.Age,
+		Status:   p.Status,
+		Level:    p.Level,
+	}
+}
+
+func (p *UpdateUserParams) ToModel() model.User {
+	return model.User{
+		Name:     p.Name,
+		Email:    p.Email,
+		Password: p.Password,
+		Age:      p.Age,
+		Status:   p.Status,
+		Level:    p.Level,
+	}
 }
 
 func MapToUserDTO(user model.User) *UserDTO {
@@ -45,15 +76,7 @@ func MapUsersToDto(users []model.User) []UserDTO {
 	usersDto := make([]UserDTO, 0, len(users))
 
 	for _, user := range users {
-		userDto := UserDTO{
-			Id:     user.ID,
-			Email:  user.Email,
-			Name:   user.Name,
-			Age:    user.Age,
-			Status: mapStatusText(user.Status),
-			Level:  mapLevelText(user.Level),
-		}
-		usersDto = append(usersDto, userDto)
+		usersDto = append(usersDto, *MapToUserDTO(user))
 	}
 
 	return usersDto
@@ -63,7 +86,7 @@ func mapStatusText(status int) string {
 	switch status {
 	case 1:
 		return "Active"
-	case 0:
+	case 2:
 		return "Inactive"
 	default:
 		return "Unknown"

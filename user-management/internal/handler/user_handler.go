@@ -2,7 +2,6 @@ package handler
 
 import (
 	"user-management/internal/dto"
-	"user-management/internal/model"
 	"user-management/internal/response"
 	"user-management/internal/service"
 	"user-management/internal/validation"
@@ -47,13 +46,15 @@ func (uh *UserHandler) GetUsers(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
-	var body model.User
-	if err := ctx.ShouldBindJSON(&body); err != nil {
+	var params dto.CreateUserParams
+	if err := ctx.ShouldBindJSON(&params); err != nil {
 		response.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
 	}
 
-	createdUser, err := uh.service.CreateUser(body)
+	user := params.ToModel()
+
+	createdUser, err := uh.service.CreateUser(user)
 	if err != nil {
 		response.ErrorResponse(ctx, err)
 		return
@@ -95,14 +96,7 @@ func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	userToUpdate := model.User{
-		Name:     body.Name,
-		Email:    body.Email,
-		Password: body.Password,
-		Age:      body.Age,
-		Status:   body.Status,
-		Level:    body.Level,
-	}
+	userToUpdate := body.ToModel()
 
 	updatedUser, err := uh.service.UpdateUser(uriParams.ID, userToUpdate)
 	if err != nil {

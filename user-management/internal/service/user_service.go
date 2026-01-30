@@ -90,7 +90,7 @@ func (us *userService) UpdateUser(id string, data model.User) (model.User, error
 	}
 
 	if u, emailExist := us.repo.FindByEmail(data.Email); emailExist && currentUser.ID != u.ID {
-		return model.User{}, utils.NewError("Email already exists", utils.CodeBadRequest)
+		return model.User{}, utils.NewError("Email already exists", utils.CodeConflict)
 	}
 
 	currentUser.Name = data.Name
