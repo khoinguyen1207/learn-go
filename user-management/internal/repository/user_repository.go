@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"slices"
 	"user-management/internal/model"
 )
 
@@ -42,8 +43,13 @@ func (ur *userRepository) Update(id string, updatedUser model.User) error {
 	return nil
 }
 
-func (ur *userRepository) Delete() {
+func (ur *userRepository) Delete(id string) error {
+	index := slices.IndexFunc(ur.users, func(u model.User) bool {
+		return u.ID == id
+	})
 
+	ur.users = slices.Delete(ur.users, index, index+1)
+	return nil
 }
 
 func (ur *userRepository) FindByEmail(email string) (model.User, bool) {

@@ -7,6 +7,6 @@ type UserRepository interface {
 	Create(user model.User) error
 	FindById(id string) (model.User, bool)
 	Update(id string, user model.User) error
-	Delete()
+	Delete(id string) error
 	FindByEmail(email string) (model.User, bool)
 }

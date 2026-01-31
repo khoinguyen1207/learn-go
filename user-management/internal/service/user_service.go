@@ -114,6 +114,13 @@ func (us *userService) UpdateUser(id string, data model.User) (model.User, error
 	return currentUser, nil
 }
 
-func (us *userService) DeleteUser() {
+func (us *userService) DeleteUser(id string) error {
+	if _, exist := us.repo.FindById(id); !exist {
+		return utils.NewError("User not found", utils.CodeNotFound)
+	}
 
+	if err := us.repo.Delete(id); err != nil {
+		return utils.WrapError(err, "Failed to delete user", utils.CodeInternalServerError)
+	}
+	return nil
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"net/http"
 	"user-management/internal/dto"
 	"user-management/internal/response"
 	"user-management/internal/service"
@@ -110,5 +111,16 @@ func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
 
 }
 func (uh *UserHandler) DeleteUser(ctx *gin.Context) {
+	var params dto.GetUserByIdParams
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		response.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
 
+	if err := uh.service.DeleteUser(params.ID); err != nil {
+		response.ErrorResponse(ctx, err)
+		return
+	}
+
+	response.SuccessResponse(ctx, "User deleted successfully", nil, http.StatusNoContent)
 }
