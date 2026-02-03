@@ -4,16 +4,16 @@ create table if not exists users (
 	email varchar(100) unique not null
 );
 
-create table if not exists user_profiles (
+create table if not exists profiles (
 	profile_id serial primary key,
 	user_id int unique not null,
 	phone varchar(10),
 	address varchar(100),
-	constraint fk_user foreign key (user_id) references users(id) on delete cascade
+	foreign key (user_id) references users(id) on delete cascade
 );
 
 drop table users;
-drop table user_profiles;
+drop table profiles;
 
 create table if not exists categories (
 	category_id serial primary key,
@@ -53,6 +53,7 @@ create table if not exists students_courses (
 drop table students_courses;
 drop table students;
 drop table courses;
+
 
 
 

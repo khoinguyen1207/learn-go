@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict tg4516RLWycM5NMC6mJgJBN9MIIa3zpsvsIJVFthKRBavvNoVgEbamTcukDQ13v
+\restrict Lp903t5qqoYGQSt0oImPN6kCKJPGpMn6o7yvy2DCv9fptQ2OIYLy7Ij1a35PDCV
 
 -- Dumped from database version 16.11 (Homebrew)
 -- Dumped by pg_dump version 16.11 (Homebrew)
@@ -131,6 +131,42 @@ ALTER SEQUENCE public.products_product_id_seq OWNED BY public.products.product_i
 
 
 --
+-- Name: profiles; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.profiles (
+    profile_id integer NOT NULL,
+    user_id integer NOT NULL,
+    phone character varying(10),
+    address character varying(100)
+);
+
+
+ALTER TABLE public.profiles OWNER TO postgres;
+
+--
+-- Name: profiles_profile_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.profiles_profile_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.profiles_profile_id_seq OWNER TO postgres;
+
+--
+-- Name: profiles_profile_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.profiles_profile_id_seq OWNED BY public.profiles.profile_id;
+
+
+--
 -- Name: students; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -174,42 +210,6 @@ ALTER SEQUENCE public.students_student_id_seq OWNER TO postgres;
 --
 
 ALTER SEQUENCE public.students_student_id_seq OWNED BY public.students.student_id;
-
-
---
--- Name: user_profiles; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.user_profiles (
-    profile_id integer NOT NULL,
-    user_id integer NOT NULL,
-    phone character varying(10),
-    address character varying(100)
-);
-
-
-ALTER TABLE public.user_profiles OWNER TO postgres;
-
---
--- Name: user_profiles_profile_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
---
-
-CREATE SEQUENCE public.user_profiles_profile_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.user_profiles_profile_id_seq OWNER TO postgres;
-
---
--- Name: user_profiles_profile_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.user_profiles_profile_id_seq OWNED BY public.user_profiles.profile_id;
 
 
 --
@@ -269,17 +269,17 @@ ALTER TABLE ONLY public.products ALTER COLUMN product_id SET DEFAULT nextval('pu
 
 
 --
+-- Name: profiles profile_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profiles ALTER COLUMN profile_id SET DEFAULT nextval('public.profiles_profile_id_seq'::regclass);
+
+
+--
 -- Name: students student_id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.students ALTER COLUMN student_id SET DEFAULT nextval('public.students_student_id_seq'::regclass);
-
-
---
--- Name: user_profiles profile_id; Type: DEFAULT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.user_profiles ALTER COLUMN profile_id SET DEFAULT nextval('public.user_profiles_profile_id_seq'::regclass);
 
 
 --
@@ -314,6 +314,14 @@ COPY public.products (product_id, category_id, name, price, image, status) FROM 
 
 
 --
+-- Data for Name: profiles; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.profiles (profile_id, user_id, phone, address) FROM stdin;
+\.
+
+
+--
 -- Data for Name: students; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -326,14 +334,6 @@ COPY public.students (student_id, name) FROM stdin;
 --
 
 COPY public.students_courses (student_id, course_id) FROM stdin;
-\.
-
-
---
--- Data for Name: user_profiles; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.user_profiles (profile_id, user_id, phone, address) FROM stdin;
 \.
 
 
@@ -367,17 +367,17 @@ SELECT pg_catalog.setval('public.products_product_id_seq', 1, false);
 
 
 --
+-- Name: profiles_profile_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.profiles_profile_id_seq', 1, false);
+
+
+--
 -- Name: students_student_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
 SELECT pg_catalog.setval('public.students_student_id_seq', 1, false);
-
-
---
--- Name: user_profiles_profile_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('public.user_profiles_profile_id_seq', 1, false);
 
 
 --
@@ -412,6 +412,22 @@ ALTER TABLE ONLY public.products
 
 
 --
+-- Name: profiles profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profiles
+    ADD CONSTRAINT profiles_pkey PRIMARY KEY (profile_id);
+
+
+--
+-- Name: profiles profiles_user_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profiles
+    ADD CONSTRAINT profiles_user_id_key UNIQUE (user_id);
+
+
+--
 -- Name: students_courses students_courses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -425,22 +441,6 @@ ALTER TABLE ONLY public.students_courses
 
 ALTER TABLE ONLY public.students
     ADD CONSTRAINT students_pkey PRIMARY KEY (student_id);
-
-
---
--- Name: user_profiles user_profiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.user_profiles
-    ADD CONSTRAINT user_profiles_pkey PRIMARY KEY (profile_id);
-
-
---
--- Name: user_profiles user_profiles_user_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.user_profiles
-    ADD CONSTRAINT user_profiles_user_id_key UNIQUE (user_id);
 
 
 --
@@ -460,19 +460,19 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: user_profiles fk_user; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.user_profiles
-    ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
-
-
---
 -- Name: products products_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.products
     ADD CONSTRAINT products_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(category_id) ON DELETE RESTRICT;
+
+
+--
+-- Name: profiles profiles_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.profiles
+    ADD CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -495,5 +495,5 @@ ALTER TABLE ONLY public.students_courses
 -- PostgreSQL database dump complete
 --
 
-\unrestrict tg4516RLWycM5NMC6mJgJBN9MIIa3zpsvsIJVFthKRBavvNoVgEbamTcukDQ13v
+\unrestrict Lp903t5qqoYGQSt0oImPN6kCKJPGpMn6o7yvy2DCv9fptQ2OIYLy7Ij1a35PDCV
 
