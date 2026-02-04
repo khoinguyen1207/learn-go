@@ -1,6 +1,42 @@
+include .env
+export
+
+MIGRATION_DIR= internal/db/migrations
+
+# Import 
 importdb:
 	docker exec -i postgres-db psql -U postgres -d gin < ./db/backup.sql
+
+# Backup
 backupdb:
 	docker exec -i postgres-db pg_dump -U postgres -d gin > ./db/backup.sql
+
+# Run Server
 server:
 	go run .
+
+# Create new migration: (make create-migrate NAME=users_table)
+create-migrate:
+	migrate create -ext sql -dir $(MIGRATION_DIR) -seq $(NAME)
+
+# Apply migrations: (make migrate-up)
+migrate-up:
+	migrate -path $(MIGRATION_DIR) -database "$(DATABASE_URL)" up
+
+# Rollback migrations: (make migrate-down)
+migrate-down:
+	migrate -path $(MIGRATION_DIR) -database "$(DATABASE_URL)" down 1
+
+# Force migration to specific version: (make migrate-force VERSION=2)
+migrate-force:
+	migrate -path $(MIGRATION_DIR) -database "$(DATABASE_URL)" force $(VERSION)
+
+# Drop all tables
+migrate-drop:
+	migrate -path $(MIGRATION_DIR) -database "$(DATABASE_URL)" drop
+
+# Migrate goto version: (make migrate-goto VERSION=2)
+migrate-goto:
+	migrate -path $(MIGRATION_DIR) -database "$(DATABASE_URL)" goto $(VERSION)
+
+.PHONY: importdb backupdb server create-migrate migrate-up migrate-down migrate-force migrate-drop migrate-goto
