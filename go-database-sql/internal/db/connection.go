@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"go-db/internal/configs"
+	"go-database-sql/internal/configs"
 	"time"
 
 	_ "github.com/lib/pq"

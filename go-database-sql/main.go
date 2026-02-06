@@ -1,10 +1,10 @@
 package main
 
 import (
-	"go-db/internal/configs"
-	"go-db/internal/db"
-	"go-db/internal/handlers"
-	"go-db/internal/repositories"
+	"go-database-sql/internal/configs"
+	"go-database-sql/internal/db"
+	"go-database-sql/internal/handlers"
+	"go-database-sql/internal/repositories"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

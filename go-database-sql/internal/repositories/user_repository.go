@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"database/sql"
-	"go-db/internal/models"
+	"go-database-sql/internal/models"
 )
 
 type userRepository struct {

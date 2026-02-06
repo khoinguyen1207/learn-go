@@ -3,8 +3,8 @@ package handlers
 import (
 	"database/sql"
 	"errors"
-	"go-db/internal/models"
-	"go-db/internal/repositories"
+	"go-database-sql/internal/models"
+	"go-database-sql/internal/repositories"
 	"net/http"
 	"strconv"
 
