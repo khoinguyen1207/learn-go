@@ -1,6 +1,8 @@
 package main
 
 import (
+	"go-db/internal/configs"
+	"go-db/internal/db"
 	"go-db/internal/handlers"
 	"go-db/internal/repositories"
 
@@ -13,17 +15,20 @@ func main() {
 		panic("Error loading .env file")
 	}
 
-	// cfg := configs.NewConfig()
+	cfg := configs.NewConfig()
+	if err := db.InitDB(cfg); err != nil {
+		panic(err)
+	}
 
 	r := gin.Default()
 
-	userRepository := repositories.NewUserRepository()
+	userRepository := repositories.NewUserRepository(db.DB)
 	userHandler := handlers.NewUserHandler(userRepository)
 
-	r.Group("/api/v1")
+	api := r.Group("/api/v1")
 	{
-		r.GET("/user/:id", userHandler.GetUserById)
-		r.POST("/user", userHandler.CreateUser)
+		api.GET("/users/:id", userHandler.GetUserById)
+		api.POST("/users", userHandler.CreateUser)
 	}
 
 	if err := r.Run(":8080"); err != nil {

@@ -1,6 +1,8 @@
 package repositories
 
+import "go-db/internal/models"
+
 type UserRepository interface {
-	GetUserById()
-	CreateUser()
+	FindById(id int) (models.User, error)
+	CreateUser(user *models.User) error
 }
