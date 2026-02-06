@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"errors"
 	"go-gorm/internal/models"
 	"go-gorm/internal/repositories"
@@ -9,6 +8,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
+	"gorm.io/gorm"
 )
 
 type UserHandler struct {
@@ -31,11 +32,11 @@ func (uh *UserHandler) GetUserById(ctx *gin.Context) {
 
 	user, err := uh.repo.FindById(idInt)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch user", "error": err.Error()})
 		return
 	}
 
@@ -51,7 +52,12 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 
 	err := uh.repo.CreateUser(&params)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			ctx.JSON(http.StatusConflict, gin.H{"message": "Email already exists"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create user", "error": err.Error()})
 		return
 	}
 

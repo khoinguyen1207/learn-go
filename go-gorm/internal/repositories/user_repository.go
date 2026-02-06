@@ -1,24 +1,23 @@
 package repositories
 
 import (
-	"database/sql"
 	"go-gorm/internal/models"
+
+	"gorm.io/gorm"
 )
 
 type userRepository struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewUserRepository(db *sql.DB) UserRepository {
+func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
 func (r *userRepository) FindById(id int) (models.User, error) {
 	var user models.User
 
-	row := r.db.QueryRow("SELECT * FROM users WHERE id = $1", id)
-	err := row.Scan(&user.ID, &user.Name, &user.Email)
-	if err != nil {
+	if err := r.db.First(&user, id).Error; err != nil {
 		return models.User{}, err
 	}
 
@@ -26,11 +25,8 @@ func (r *userRepository) FindById(id int) (models.User, error) {
 }
 
 func (r *userRepository) CreateUser(user *models.User) error {
-	row := r.db.QueryRow("INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id", user.Name, user.Email)
-	err := row.Scan(&user.ID)
-	if err != nil {
+	if err := r.db.Create(user).Error; err != nil {
 		return err
 	}
-
 	return nil
 }

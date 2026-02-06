@@ -2,34 +2,45 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"go-gorm/internal/configs"
 	"time"
 
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
-var DB *sql.DB
+var DB *gorm.DB
 
 func InitDB(cfg *configs.Config) error {
 	dns := cfg.Db.ConnectionString
 
 	var err error
-	DB, err = sql.Open("postgres", dns)
+	DB, err = gorm.Open(postgres.New(postgres.Config{
+		DSN: dns,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 	if err != nil {
 		return err
 	}
 
-	DB.SetMaxIdleConns(3)                   // Số kết nối nhàn rỗi tối đa
-	DB.SetMaxOpenConns(30)                  // Số kết nối tối đa
-	DB.SetConnMaxLifetime(30 * time.Minute) // Thời gian sống tối đa của một kết nối
-	DB.SetConnMaxIdleTime(5 * time.Minute)  // Đóng kết nối nhàn rỗi sau khoảng thời gian này
+	sqlDB, err := DB.DB()
+	if err != nil {
+		return fmt.Errorf("Could not get database instance: %v", err)
+	}
 
-	context, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	sqlDB.SetMaxIdleConns(3)                   // Số kết nối nhàn rỗi tối đa
+	sqlDB.SetMaxOpenConns(30)                  // Số kết nối tối đa
+	sqlDB.SetConnMaxLifetime(30 * time.Minute) // Thời gian sống tối đa của một kết nối
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Đóng kết nối nhàn rỗi sau khoảng thời gian này
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := DB.PingContext(context); err != nil {
-		DB.Close()
+
+	if err := sqlDB.PingContext(ctx); err != nil {
+		sqlDB.Close()
 		return fmt.Errorf("Could not connect to the database: %v", err)
 	}
 
