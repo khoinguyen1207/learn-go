@@ -25,6 +25,7 @@ func InitDB(cfg configs.Config) error {
 	poolConfig.MinConns = 3
 	poolConfig.MaxConnLifetime = 30 * 60 // 30 minutes
 	poolConfig.MaxConnIdleTime = 5 * 60  // 5 minutes
+	poolConfig.HealthCheckPeriod = 1 * time.Minute
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
