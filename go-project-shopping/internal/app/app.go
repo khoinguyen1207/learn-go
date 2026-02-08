@@ -1,10 +1,16 @@
 package app
 
 import (
+	"context"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
 	"project-shopping/internal/config"
 	"project-shopping/internal/routes"
 	"project-shopping/internal/validation"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -27,7 +33,9 @@ func NewApplication(cfg *config.Config) *Application {
 		log.Fatal("Failed to initialize validator:", err)
 	}
 
-	loadEnv()
+	if err := godotenv.Load(); err != nil {
+		panic("Error loading .env file")
+	}
 
 	modules := []Module{
 		NewUserModule(),
@@ -43,7 +51,34 @@ func NewApplication(cfg *config.Config) *Application {
 }
 
 func (app *Application) Run() error {
-	return app.router.Run(app.config.Port)
+	srv := &http.Server{
+		Addr:    app.config.Port,
+		Handler: app.router,
+	}
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+
+	go func() {
+		log.Printf("✅ Server is running on port %s", app.config.Port)
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalf("ListenAndServe error: %v", err)
+		}
+	}()
+
+	<-quit
+	log.Println("⚠️  Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("❌ Server forced to shutdown: %v", err)
+	}
+
+	log.Println("✅ Stopped server gracefully")
+
+	return nil
 }
 
 func getModuleRoutes(modules []Module) []routes.Route {
@@ -54,10 +89,4 @@ func getModuleRoutes(modules []Module) []routes.Route {
 	}
 
 	return routeList
-}
-
-func loadEnv() {
-	if err := godotenv.Load(); err != nil {
-		panic("Error loading .env file")
-	}
 }

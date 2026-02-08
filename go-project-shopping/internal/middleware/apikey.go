@@ -13,12 +13,12 @@ func ApiKeyMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		clientApiKey := ctx.GetHeader("x-api-key")
 		if clientApiKey == "" {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Missing API key"})
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Missing API key"})
 			return
 		}
 
 		if clientApiKey != apiKey {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid API key"})
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid API key"})
 			return
 		}
 
