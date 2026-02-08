@@ -1,12 +1,10 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 	"project-shopping/internal/dto"
 	"project-shopping/internal/service"
 	"project-shopping/internal/validation"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,9 +53,6 @@ func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
 		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
 	}
-
-	time.Sleep(10 * time.Second)
-	log.Println("Simulated long processing time of 10 seconds")
 
 	dto.SuccessResponse(ctx, "Get user successfully", "")
 }

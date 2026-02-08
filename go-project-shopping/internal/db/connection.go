@@ -13,7 +13,7 @@ import (
 
 var DB *sqlc.Queries
 
-func InitDB(cfg config.Config) error {
+func InitDB(cfg *config.Config) error {
 	dns := cfg.Db.DatabaseUrl
 
 	poolConfig, err := pgxpool.ParseConfig(dns)
