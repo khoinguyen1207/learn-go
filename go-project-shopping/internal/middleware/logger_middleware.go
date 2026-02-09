@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
+	"project-shopping/internal/utils"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type CustomResponseWriter struct {
@@ -24,14 +23,7 @@ func (w *CustomResponseWriter) Write(data []byte) (n int, err error) {
 }
 
 func LoggerMiddleware() gin.HandlerFunc {
-	logger := zerolog.New(&lumberjack.Logger{
-		Filename:   "internal/logs/app.log",
-		MaxSize:    1, // megabytes
-		MaxBackups: 3,
-		MaxAge:     7, //days
-		Compress:   true,
-		LocalTime:  true,
-	}).With().Timestamp().Logger()
+	logger := utils.NewLoggerWithPath("internal/logs/app.log", "info")
 
 	return func(c *gin.Context) {
 		start := time.Now()
