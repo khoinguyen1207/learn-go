@@ -3,6 +3,7 @@ package utils
 import (
 	"os"
 	"project-shopping/pkg/logger"
+	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog"
@@ -22,6 +23,17 @@ func GetEnv(key string, defaultValue string) string {
 		return value
 	}
 
+	return defaultValue
+}
+
+func GetEnvAsInt(name string, defaultValue int) int {
+	if valueStr := os.Getenv(name); valueStr != "" {
+		intVal, err := strconv.Atoi(valueStr)
+		if err != nil {
+			return defaultValue
+		}
+		return intVal
+	}
 	return defaultValue
 }
 

@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
-	"project-shopping/internal/utils"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 )
 
 type CustomResponseWriter struct {
@@ -22,9 +22,7 @@ func (w *CustomResponseWriter) Write(data []byte) (n int, err error) {
 	return w.ResponseWriter.Write(data)
 }
 
-func LoggerMiddleware() gin.HandlerFunc {
-	logger := utils.NewLoggerWithPath("internal/logs/app.log", "info")
-
+func LoggerMiddleware(logger *zerolog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		request_body := make(map[string]any)

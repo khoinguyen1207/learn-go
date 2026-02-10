@@ -3,21 +3,19 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"project-shopping/internal/utils"
 	"runtime/debug"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 )
 
-func RecoveryMiddleware() gin.HandlerFunc {
-	recoveryLogger := utils.NewLoggerWithPath("internal/logs/recovery.log", "error")
-
+func RecoveryMiddleware(logger *zerolog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
 				stack := debug.Stack()
 
-				recoveryLogger.Error().
+				logger.Error().
 					Str("path", c.Request.URL.Path).
 					Str("method", c.Request.Method).
 					Str("client_ip", c.ClientIP()).
