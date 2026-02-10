@@ -14,12 +14,12 @@ type Config struct {
 	Db   DatabaseConfig
 }
 
-var RATE_LIMIT_REQUEST_SECS int
+var RATE_LIMIT_REQUEST_SECOND int
 var RATE_LIMIT_REQUEST_BURST int
 
 func NewConfig() *Config {
 	// Load rate limit settings from environment variables
-	RATE_LIMIT_REQUEST_SECS = utils.GetEnvAsInt("RATE_LIMIT_REQUEST_SECS", 5)
+	RATE_LIMIT_REQUEST_SECOND = utils.GetEnvAsInt("RATE_LIMIT_REQUEST_SECOND", 5)
 	RATE_LIMIT_REQUEST_BURST = utils.GetEnvAsInt("RATE_LIMIT_REQUEST_BURST", 10)
 
 	return &Config{
