@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 
 	// Initialize configuration
@@ -21,6 +21,6 @@ func main() {
 
 	// Run the application
 	if err := application.Run(); err != nil {
-		panic(err)
+		log.Fatalf("Application run error: %v", err)
 	}
 }

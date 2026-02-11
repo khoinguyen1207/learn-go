@@ -1,18 +1,31 @@
 package repository
 
+import (
+	"context"
+	"project-shopping/internal/db/sqlc"
+)
+
 type userRepository struct {
+	db sqlc.Querier
 }
 
-func NewUserRepository() UserRepository {
-	return &userRepository{}
+func NewUserRepository(db sqlc.Querier) UserRepository {
+	return &userRepository{
+		db: db,
+	}
 }
 
 func (ur *userRepository) FindAll() error {
 	return nil
 }
 
-func (ur *userRepository) Create() error {
-	return nil
+func (ur *userRepository) Create(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error) {
+	data, err := ur.db.CreateUser(ctx, arg)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+
+	return data, nil
 }
 
 func (ur *userRepository) FindById(id string) bool {

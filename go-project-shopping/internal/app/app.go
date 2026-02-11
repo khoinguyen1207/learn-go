@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/signal"
 	"project-shopping/internal/config"
+	"project-shopping/internal/db"
+	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/routes"
 	"project-shopping/internal/validation"
 	"syscall"
@@ -25,6 +27,10 @@ type Application struct {
 	modules []Module
 }
 
+type ModuleContext struct {
+	db sqlc.Querier
+}
+
 func NewApplication(cfg *config.Config) *Application {
 	r := gin.Default()
 
@@ -32,8 +38,16 @@ func NewApplication(cfg *config.Config) *Application {
 		log.Fatal("Failed to initialize validator:", err)
 	}
 
+	if err := db.InitDB(cfg); err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+
+	moduleContext := &ModuleContext{
+		db: db.DB,
+	}
+
 	modules := []Module{
-		NewUserModule(),
+		NewUserModule(moduleContext),
 	}
 
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)

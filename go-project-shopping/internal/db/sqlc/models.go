@@ -11,9 +11,19 @@ import (
 )
 
 type User struct {
-	ID        int32     `json:"id"`
-	Uuid      uuid.UUID `json:"uuid"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
+	ID   int32     `json:"id"`
+	Uuid uuid.UUID `json:"uuid"`
+	// User email address: must be unique
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Fullname string `json:"fullname"`
+	// Age of the user: must be between 1 and 120
+	Age *int32 `json:"age"`
+	// Status of the user: 1 - active, 2 - inactive, 3 - banned
+	Status int32 `json:"status"`
+	// Level of the user: 1 - administrator, 2 - moderator, 3 - member
+	Level     int32      `json:"level"`
+	DeletedAt *time.Time `json:"deleted_at"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
 }

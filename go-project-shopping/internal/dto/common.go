@@ -54,7 +54,7 @@ func ValidationResponse(ctx *gin.Context, err any) {
 
 func httpStatusFromErrorCode(code utils.ErrorResponseCode) int {
 	switch code {
-	case utils.CodeBadRequest:
+	case utils.CodeBadRequest, utils.CodeValidationError:
 		return http.StatusBadRequest
 	case utils.CodeUnauthorized:
 		return http.StatusUnauthorized

@@ -38,13 +38,23 @@ func (uh *UserHandler) GetUsers(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
-	var params dto.CreateUserParams
-	if err := ctx.ShouldBindJSON(&params); err != nil {
+	var req dto.CreateUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
 	}
 
-	dto.SuccessResponse(ctx, "User created successfully", "")
+	input := req.MapCreateInputToModel()
+
+	createdUser, err := uh.service.CreateUser(ctx.Request.Context(), input)
+	if err != nil {
+		dto.ErrorResponse(ctx, err)
+		return
+	}
+
+	userDto := dto.MapToUserDTO(createdUser)
+
+	dto.SuccessResponse(ctx, "User created successfully", userDto)
 }
 
 func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
