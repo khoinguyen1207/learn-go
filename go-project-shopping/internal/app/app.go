@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 type Module interface {
@@ -31,10 +30,6 @@ func NewApplication(cfg *config.Config) *Application {
 
 	if err := validation.InitValidator(); err != nil {
 		log.Fatal("Failed to initialize validator:", err)
-	}
-
-	if err := godotenv.Load(); err != nil {
-		panic("Error loading .env file")
 	}
 
 	modules := []Module{
