@@ -37,6 +37,16 @@ func (uh *UserHandler) GetUsers(ctx *gin.Context) {
 	dto.SuccessResponse(ctx, "Get users successfully", "")
 }
 
+func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
+	var params dto.GetUserByIdParams
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
+
+	dto.SuccessResponse(ctx, "Get user successfully", "")
+}
+
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 	var req dto.CreateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -55,16 +65,6 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 	userDto := dto.MapToUserDTO(createdUser)
 
 	dto.SuccessResponse(ctx, "User created successfully", userDto)
-}
-
-func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
-	var params dto.GetUserByIdParams
-	if err := ctx.ShouldBindUri(&params); err != nil {
-		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
-		return
-	}
-
-	dto.SuccessResponse(ctx, "Get user successfully", "")
 }
 
 func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
