@@ -18,6 +18,7 @@ func RegisterRoutes(r *gin.Engine, routes ...Route) {
 
 	r.Use(
 		middleware.RateLimiterMiddleware(rateLimitLogger),
+		middleware.TraceMiddleware(),
 		middleware.RecoveryMiddleware(recoveryLogger),
 		middleware.LoggerMiddleware(httpLogger),
 		middleware.ApiKeyMiddleware(),

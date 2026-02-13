@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
+	"project-shopping/pkg/logger"
 	"strings"
 	"time"
 
@@ -22,7 +23,7 @@ func (w *CustomResponseWriter) Write(data []byte) (n int, err error) {
 	return w.ResponseWriter.Write(data)
 }
 
-func LoggerMiddleware(logger *zerolog.Logger) gin.HandlerFunc {
+func LoggerMiddleware(l *zerolog.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		request_body := make(map[string]any)
@@ -31,7 +32,7 @@ func LoggerMiddleware(logger *zerolog.Logger) gin.HandlerFunc {
 		contentType := c.GetHeader("Content-Type")
 		if strings.HasPrefix(contentType, "multipart/form-data") {
 			if err := c.Request.ParseMultipartForm(32 << 20); err != nil {
-				logger.Error().Err(err).Msg("Failed to parse multipart form")
+				l.Error().Err(err).Msg("Failed to parse multipart form")
 			} else {
 				// Extract form values
 				for key, vals := range c.Request.MultipartForm.Value {
@@ -60,7 +61,7 @@ func LoggerMiddleware(logger *zerolog.Logger) gin.HandlerFunc {
 		} else {
 			bodyBytes, err := io.ReadAll(c.Request.Body)
 			if err != nil {
-				logger.Error().Err(err).Msg("Failed to read request body")
+				l.Error().Err(err).Msg("Failed to read request body")
 			}
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
@@ -105,16 +106,18 @@ func LoggerMiddleware(logger *zerolog.Logger) gin.HandlerFunc {
 		}
 
 		status_code := c.Writer.Status()
-		logEvent := logger.Info()
+		logEvent := l.Info()
 		if status_code >= 500 {
-			logEvent = logger.Error()
+			logEvent = l.Error()
 		} else if status_code >= 400 {
-			logEvent = logger.Warn()
+			logEvent = l.Warn()
 		}
 
 		duration := time.Since(start)
+		traceId := logger.GetTraceId(c.Request.Context())
 
 		logEvent.Str("method", c.Request.Method).
+			Str("trace_id", traceId).
 			Str("path", c.Request.URL.Path).
 			Str("query", c.Request.URL.RawQuery).
 			Str("host", c.Request.Host).
