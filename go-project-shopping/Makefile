@@ -13,7 +13,7 @@ backupdb:
 
 # Run Server
 server:
-	go run ./cmd/api
+	go run ./cmd/api/main.go
 
 # Sqlc generate
 sqlc:

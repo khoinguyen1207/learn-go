@@ -6,9 +6,12 @@ import (
 	"log"
 	"project-shopping/internal/config"
 	"project-shopping/internal/db/sqlc"
+	"project-shopping/internal/utils"
+	"project-shopping/pkg/pgx"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/tracelog"
 )
 
 var DB sqlc.Querier
@@ -21,13 +24,26 @@ func InitDB(cfg *config.Config) error {
 		return fmt.Errorf("Unable to parse database configuration: %v", err)
 	}
 
-	poolConfig.MaxConns = 30
-	poolConfig.MinConns = 3
-	poolConfig.MaxConnLifetime = 30 * 60 // 30 minutes
-	poolConfig.MaxConnIdleTime = 5 * 60  // 5 minutes
-	poolConfig.HealthCheckPeriod = 1 * time.Minute
+	sqlLogger := utils.NewLoggerWithPath("internal/logs/sql.log", "info")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	sqlLogger.Info().Msg("Initializing database connection...")
+
+	// Configure pgx tracer with zerolog
+	poolConfig.ConnConfig.Tracer = &tracelog.TraceLog{
+		Logger: &pgx.PgxZeroLogTracer{
+			Logger:         *sqlLogger,
+			SlowQueryLimit: 500 * time.Millisecond,
+		},
+		LogLevel: tracelog.LogLevelDebug,
+	}
+
+	poolConfig.MaxConns = 30
+	poolConfig.MinConns = 5
+	poolConfig.MaxConnLifetime = 30 * time.Minute  // 30 minutes
+	poolConfig.MaxConnIdleTime = 5 * time.Minute   // 5 minutes
+	poolConfig.HealthCheckPeriod = 1 * time.Minute // 1 minutes
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	dbpool, err := pgxpool.NewWithConfig(ctx, poolConfig)
