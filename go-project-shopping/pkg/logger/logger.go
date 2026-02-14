@@ -31,7 +31,6 @@ func NewLoggerConfig(cfg LoggerConfig) *zerolog.Logger {
 	if err != nil {
 		lvl = zerolog.InfoLevel
 	}
-	// zerolog.SetGlobalLevel(lvl)
 
 	var writer io.Writer
 	if cfg.IsDev == "development" {

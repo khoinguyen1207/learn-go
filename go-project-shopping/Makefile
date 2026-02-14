@@ -12,7 +12,7 @@ backupdb:
 	docker exec -i postgres-db pg_dump -U postgres -d gin > ./db/backup.sql
 
 # Run Server
-server:
+run:
 	go run ./cmd/api/main.go
 
 # Sqlc generate

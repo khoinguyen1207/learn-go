@@ -26,8 +26,6 @@ func InitDB(cfg *config.Config) error {
 
 	sqlLogger := utils.NewLoggerWithPath("internal/logs/sql.log", "info")
 
-	sqlLogger.Info().Msg("Initializing database connection...")
-
 	// Configure pgx tracer with zerolog
 	poolConfig.ConnConfig.Tracer = &tracelog.TraceLog{
 		Logger: &pgx.PgxZeroLogTracer{
