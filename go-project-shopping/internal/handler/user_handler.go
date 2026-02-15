@@ -20,7 +20,7 @@ func NewUserHandler(service service.UserService) *UserHandler {
 }
 
 func (uh *UserHandler) GetUsers(ctx *gin.Context) {
-	var params dto.GetUsersParams
+	var params dto.GetUsersRequest
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
@@ -38,7 +38,7 @@ func (uh *UserHandler) GetUsers(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
-	var params dto.GetUserByIdParams
+	var params dto.GetUserByIdRequest
 	if err := ctx.ShouldBindUri(&params); err != nil {
 		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
@@ -68,23 +68,33 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
-	var uriParams dto.GetUserByIdParams
-	if err := ctx.ShouldBindUri(&uriParams); err != nil {
+	var uriReq dto.GetUserByIdRequest
+	if err := ctx.ShouldBindUri(&uriReq); err != nil {
 		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
 	}
 
-	var body dto.UpdateUserParams
+	var body dto.UpdateUserRequest
 	if err := ctx.ShouldBindJSON(&body); err != nil {
 		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
 	}
 
-	dto.SuccessResponse(ctx, "User updated successfully", "")
+	input := body.MapUpdateInputToModel(uriReq.ID)
+
+	updatedUser, err := uh.service.UpdateUser(ctx.Request.Context(), input)
+	if err != nil {
+		dto.ErrorResponse(ctx, err)
+		return
+	}
+
+	data := dto.MapToUserDTO(updatedUser)
+
+	dto.SuccessResponse(ctx, "User updated successfully", data)
 }
 
 func (uh *UserHandler) DeleteUser(ctx *gin.Context) {
-	var params dto.GetUserByIdParams
+	var params dto.GetUserByIdRequest
 	if err := ctx.ShouldBindUri(&params); err != nil {
 		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return

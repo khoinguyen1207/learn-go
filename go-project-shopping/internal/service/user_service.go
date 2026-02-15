@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/repository"
@@ -21,6 +22,10 @@ func NewUserService(repo repository.UserRepository) UserService {
 }
 
 func (us *userService) GetUsers(search string, page, limit int) error {
+	return nil
+}
+
+func (us *userService) GetUserByID(id string) error {
 	return nil
 }
 
@@ -45,12 +50,26 @@ func (us *userService) CreateUser(ctx context.Context, input sqlc.CreateUserPara
 	return user, nil
 }
 
-func (us *userService) GetUserByID(id string) error {
-	return nil
-}
+func (us *userService) UpdateUser(ctx context.Context, input sqlc.UpdateUserParams) (sqlc.User, error) {
+	if input.Password != nil {
+		hashedPassword, err := utils.HashPassword(*input.Password)
+		if err != nil {
+			return sqlc.User{}, utils.WrapError(err, "Failed to hash password", utils.CodeBadRequest)
+		}
 
-func (us *userService) UpdateUser(id string) error {
-	return nil
+		hashedPasswordStr := string(hashedPassword)
+		input.Password = &hashedPasswordStr
+	}
+
+	user, err := us.repo.Update(ctx, input)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return sqlc.User{}, utils.NewError("User not found", utils.CodeNotFound)
+		}
+		return sqlc.User{}, utils.WrapError(err, "Failed to update user", utils.CodeBadRequest)
+	}
+
+	return user, nil
 }
 
 func (us *userService) DeleteUser(id string) error {

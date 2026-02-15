@@ -49,3 +49,50 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	)
 	return i, err
 }
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET
+    password = COALESCE($1, password),
+    fullname = COALESCE($2, fullname),
+    age = COALESCE($3, age),
+    status = COALESCE($4, status),
+    level = COALESCE($5, level)
+WHERE id = $6 AND deleted_at IS NULL
+RETURNING id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at
+`
+
+type UpdateUserParams struct {
+	Password *string `json:"password"`
+	Fullname *string `json:"fullname"`
+	Age      *int32  `json:"age"`
+	Status   *int32  `json:"status"`
+	Level    *int32  `json:"level"`
+	ID       *int32  `json:"id"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.Password,
+		arg.Fullname,
+		arg.Age,
+		arg.Status,
+		arg.Level,
+		arg.ID,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Email,
+		&i.Password,
+		&i.Fullname,
+		&i.Age,
+		&i.Status,
+		&i.Level,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

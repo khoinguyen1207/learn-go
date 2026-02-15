@@ -17,11 +17,11 @@ type UserDTO struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-type GetUserByIdParams struct {
-	ID string `uri:"id" binding:"required,uuid"`
+type GetUserByIdRequest struct {
+	ID int `uri:"id" binding:"required,gte=0"`
 }
 
-type GetUsersParams struct {
+type GetUsersRequest struct {
 	Search string `form:"search" binding:"omitempty,min=3,max=100"`
 	Page   int    `form:"page" binding:"omitempty,gte=1"`
 	Limit  int    `form:"limit" binding:"omitempty,gte=1,lte=100"`
@@ -36,19 +36,30 @@ type CreateUserRequest struct {
 	Level    int32  `json:"level" binding:"required,oneof=1 2 3"`
 }
 
-type UpdateUserParams struct {
-	Fullname string `json:"fullname" binding:"required,min=3,max=100"`
-	Email    string `json:"email" binding:"required,email,email_advanced"`
-	Password string `json:"password" binding:"omitempty,strong_password"`
-	Age      int32  `json:"age" binding:"required,gt=0,lte=120"`
-	Status   int32  `json:"status" binding:"required,oneof=1 2 3"`
-	Level    int32  `json:"level" binding:"required,oneof=1 2 3"`
+type UpdateUserRequest struct {
+	Fullname *string `json:"fullname" binding:"omitempty,min=3,max=100"`
+	Password *string `json:"password" binding:"omitempty,strong_password"`
+	Age      *int32  `json:"age" binding:"omitempty,gt=0,lte=120"`
+	Status   *int32  `json:"status" binding:"omitempty,oneof=1 2 3"`
+	Level    *int32  `json:"level" binding:"omitempty,oneof=1 2 3"`
 }
 
 func (input *CreateUserRequest) MapCreateInputToModel() sqlc.CreateUserParams {
 	return sqlc.CreateUserParams{
 		Fullname: input.Fullname,
 		Email:    input.Email,
+		Password: input.Password,
+		Age:      input.Age,
+		Status:   input.Status,
+		Level:    input.Level,
+	}
+}
+
+func (input *UpdateUserRequest) MapUpdateInputToModel(id int) sqlc.UpdateUserParams {
+	id32 := int32(id)
+	return sqlc.UpdateUserParams{
+		ID:       &id32,
+		Fullname: input.Fullname,
 		Password: input.Password,
 		Age:      input.Age,
 		Status:   input.Status,

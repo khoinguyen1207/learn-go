@@ -7,9 +7,9 @@ import (
 
 type UserRepository interface {
 	FindAll() error
-	Create(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
 	FindById(id string) bool
-	Update(id string) error
+	Create(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
+	Update(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error)
 	Delete(id string) error
 	FindByEmail(email string) bool
 }
