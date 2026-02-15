@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"project-shopping/internal/db/sqlc"
+
+	"github.com/google/uuid"
 )
 
 type userRepository struct {
@@ -41,8 +43,22 @@ func (ur *userRepository) Update(ctx context.Context, arg sqlc.UpdateUserParams)
 	return data, nil
 }
 
-func (ur *userRepository) Delete(id string) error {
-	return nil
+func (ur *userRepository) Delete(ctx context.Context, uuid uuid.UUID) (sqlc.User, error) {
+	data, err := ur.db.SoftDeleteUser(ctx, uuid)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+
+	return data, nil
+}
+
+func (ur *userRepository) Restore(ctx context.Context, uuid uuid.UUID) (sqlc.User, error) {
+	data, err := ur.db.RestoreUser(ctx, uuid)
+	if err != nil {
+		return sqlc.User{}, err
+	}
+
+	return data, nil
 }
 
 func (ur *userRepository) FindByEmail(email string) bool {

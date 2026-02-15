@@ -38,6 +38,7 @@ func SuccessResponse(ctx *gin.Context, message string, data any, status ...int) 
 		})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": message,
 		"data":    data,

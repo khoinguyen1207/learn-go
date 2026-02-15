@@ -7,6 +7,8 @@ package sqlc
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -33,6 +35,58 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Status,
 		arg.Level,
 	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Email,
+		&i.Password,
+		&i.Fullname,
+		&i.Age,
+		&i.Status,
+		&i.Level,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const restoreUser = `-- name: RestoreUser :one
+UPDATE users
+SET deleted_at = NULL
+WHERE uuid = $1 AND deleted_at IS NOT NULL
+RETURNING id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at
+`
+
+func (q *Queries) RestoreUser(ctx context.Context, argUuid uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, restoreUser, argUuid)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Email,
+		&i.Password,
+		&i.Fullname,
+		&i.Age,
+		&i.Status,
+		&i.Level,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const softDeleteUser = `-- name: SoftDeleteUser :one
+UPDATE users
+SET deleted_at = NOW()
+WHERE uuid = $1 AND deleted_at IS NULL
+RETURNING id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at
+`
+
+func (q *Queries) SoftDeleteUser(ctx context.Context, argUuid uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, softDeleteUser, argUuid)
 	var i User
 	err := row.Scan(
 		&i.ID,

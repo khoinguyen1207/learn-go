@@ -21,6 +21,10 @@ type GetUserByIdRequest struct {
 	ID int `uri:"id" binding:"required,gte=0"`
 }
 
+type GetUserByUuidRequest struct {
+	Uuid string `uri:"uuid" binding:"required,uuid"`
+}
+
 type GetUsersRequest struct {
 	Search string `form:"search" binding:"omitempty,min=3,max=100"`
 	Page   int    `form:"page" binding:"omitempty,gte=1"`

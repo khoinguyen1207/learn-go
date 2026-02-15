@@ -8,6 +8,7 @@ import (
 	"project-shopping/internal/repository"
 	"project-shopping/internal/utils"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -72,6 +73,36 @@ func (us *userService) UpdateUser(ctx context.Context, input sqlc.UpdateUserPara
 	return user, nil
 }
 
-func (us *userService) DeleteUser(id string) error {
-	return nil
+func (us *userService) DeleteUser(ctx context.Context, id string) (sqlc.User, error) {
+	uuidParsed, err := uuid.Parse(id)
+	if err != nil {
+		return sqlc.User{}, utils.WrapError(err, "Invalid user ID format", utils.CodeBadRequest)
+	}
+
+	user, err := us.repo.Delete(ctx, uuidParsed)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return sqlc.User{}, utils.NewError("User not found or already deleted", utils.CodeNotFound)
+		}
+		return sqlc.User{}, utils.WrapError(err, "Failed to delete user", utils.CodeBadRequest)
+	}
+
+	return user, nil
+}
+
+func (us *userService) RestoreUser(ctx context.Context, id string) (sqlc.User, error) {
+	uuidParsed, err := uuid.Parse(id)
+	if err != nil {
+		return sqlc.User{}, utils.WrapError(err, "Invalid user ID format", utils.CodeBadRequest)
+	}
+
+	user, err := us.repo.Restore(ctx, uuidParsed)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return sqlc.User{}, utils.NewError("User not found or not deleted", utils.CodeNotFound)
+		}
+		return sqlc.User{}, utils.WrapError(err, "Failed to restore user", utils.CodeBadRequest)
+	}
+
+	return user, nil
 }
