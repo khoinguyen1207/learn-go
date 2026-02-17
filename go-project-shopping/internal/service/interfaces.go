@@ -6,7 +6,7 @@ import (
 )
 
 type UserService interface {
-	GetUsers(search string, page, limit int) error
+	GetUsers(ctx context.Context, search string, orderBy, sort string, page, limit int32) ([]sqlc.User, error)
 	CreateUser(ctx context.Context, input sqlc.CreateUserParams) (sqlc.User, error)
 	GetUserByID(id string) error
 	UpdateUser(ctx context.Context, input sqlc.UpdateUserParams) (sqlc.User, error)

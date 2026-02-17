@@ -17,12 +17,44 @@ func NewUserRepository(db sqlc.Querier) UserRepository {
 	}
 }
 
-func (ur *userRepository) FindAll() error {
-	return nil
-}
+func (ur *userRepository) GetAll(ctx context.Context, search, orderBy, sort string, limit, offset int32) ([]sqlc.User, error) {
+	var (
+		data []sqlc.User
+		err  error
+	)
 
-func (ur *userRepository) FindById(id string) bool {
-	return false
+	switch {
+	case orderBy == "created_at" && sort == "asc":
+		data, err = ur.db.ListUsersOrderByCreatedAtAsc(ctx, sqlc.ListUsersOrderByCreatedAtAscParams{
+			Search: search,
+			Limit:  limit,
+			Offset: offset,
+		})
+	case orderBy == "created_at" && sort == "desc":
+		data, err = ur.db.ListUsersOrderByCreatedAtDesc(ctx, sqlc.ListUsersOrderByCreatedAtDescParams{
+			Search: search,
+			Limit:  limit,
+			Offset: offset,
+		})
+	case orderBy == "id" && sort == "asc":
+		data, err = ur.db.ListUsersOrderByIdAsc(ctx, sqlc.ListUsersOrderByIdAscParams{
+			Search: search,
+			Limit:  limit,
+			Offset: offset,
+		})
+	case orderBy == "id" && sort == "desc":
+		data, err = ur.db.ListUsersOrderByIdDesc(ctx, sqlc.ListUsersOrderByIdDescParams{
+			Search: search,
+			Limit:  limit,
+			Offset: offset,
+		})
+	}
+
+	if err != nil {
+		return []sqlc.User{}, err
+	}
+
+	return data, nil
 }
 
 func (ur *userRepository) Create(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error) {
@@ -59,6 +91,10 @@ func (ur *userRepository) Restore(ctx context.Context, uuid uuid.UUID) (sqlc.Use
 	}
 
 	return data, nil
+}
+
+func (ur *userRepository) FindById(id string) bool {
+	return false
 }
 
 func (ur *userRepository) FindByEmail(email string) bool {

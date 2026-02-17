@@ -26,15 +26,15 @@ func (uh *UserHandler) GetUsers(ctx *gin.Context) {
 		return
 	}
 
-	if params.Page == 0 {
-		params.Page = 1
+	users, err := uh.service.GetUsers(ctx.Request.Context(), params.Search, params.OrderBy, params.Sort, params.Page, params.Limit)
+	if err != nil {
+		dto.ErrorResponse(ctx, err)
+		return
 	}
 
-	if params.Limit == 0 {
-		params.Limit = 10
-	}
+	userDtos := dto.MapUsersToDto(users)
 
-	dto.SuccessResponse(ctx, "Get users successfully", "")
+	dto.SuccessResponse(ctx, "Get users successfully", userDtos)
 }
 
 func (uh *UserHandler) GetUserByID(ctx *gin.Context) {

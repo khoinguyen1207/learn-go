@@ -8,11 +8,11 @@ import (
 )
 
 type UserRepository interface {
-	FindAll() error
-	FindById(id string) bool
+	GetAll(ctx context.Context, search, orderBy, sort string, limit, offset int32) ([]sqlc.User, error)
 	Create(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error)
 	Update(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error)
 	Delete(ctx context.Context, uuid uuid.UUID) (sqlc.User, error)
 	Restore(ctx context.Context, uuid uuid.UUID) (sqlc.User, error)
+	FindById(id string) bool
 	FindByEmail(email string) bool
 }

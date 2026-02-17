@@ -52,6 +52,210 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const listUsersOrderByCreatedAtAsc = `-- name: ListUsersOrderByCreatedAtAsc :many
+SELECT id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at FROM users 
+WHERE deleted_at IS NULL
+AND (
+    $3::TEXT IS NULL 
+    OR $3::TEXT = ''
+    OR email ILIKE '%' || $3 || '%'
+    OR fullname ILIKE '%' || $3 || '%'
+)
+ORDER BY created_at ASC
+LIMIT $1 OFFSET $2
+`
+
+type ListUsersOrderByCreatedAtAscParams struct {
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
+	Search string `json:"search"`
+}
+
+func (q *Queries) ListUsersOrderByCreatedAtAsc(ctx context.Context, arg ListUsersOrderByCreatedAtAscParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsersOrderByCreatedAtAsc, arg.Limit, arg.Offset, arg.Search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.Email,
+			&i.Password,
+			&i.Fullname,
+			&i.Age,
+			&i.Status,
+			&i.Level,
+			&i.DeletedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsersOrderByCreatedAtDesc = `-- name: ListUsersOrderByCreatedAtDesc :many
+SELECT id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at FROM users 
+WHERE deleted_at IS NULL
+AND (
+    $3::TEXT IS NULL 
+    OR $3::TEXT = ''
+    OR email ILIKE '%' || $3 || '%'
+    OR fullname ILIKE '%' || $3 || '%'
+)
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListUsersOrderByCreatedAtDescParams struct {
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
+	Search string `json:"search"`
+}
+
+func (q *Queries) ListUsersOrderByCreatedAtDesc(ctx context.Context, arg ListUsersOrderByCreatedAtDescParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsersOrderByCreatedAtDesc, arg.Limit, arg.Offset, arg.Search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.Email,
+			&i.Password,
+			&i.Fullname,
+			&i.Age,
+			&i.Status,
+			&i.Level,
+			&i.DeletedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsersOrderByIdAsc = `-- name: ListUsersOrderByIdAsc :many
+SELECT id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at FROM users 
+WHERE deleted_at IS NULL
+AND (
+    $3::TEXT IS NULL 
+    OR $3::TEXT = ''
+    OR email ILIKE '%' || $3 || '%'
+    OR fullname ILIKE '%' || $3 || '%'
+)
+ORDER BY id ASC
+LIMIT $1 OFFSET $2
+`
+
+type ListUsersOrderByIdAscParams struct {
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
+	Search string `json:"search"`
+}
+
+func (q *Queries) ListUsersOrderByIdAsc(ctx context.Context, arg ListUsersOrderByIdAscParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsersOrderByIdAsc, arg.Limit, arg.Offset, arg.Search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.Email,
+			&i.Password,
+			&i.Fullname,
+			&i.Age,
+			&i.Status,
+			&i.Level,
+			&i.DeletedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsersOrderByIdDesc = `-- name: ListUsersOrderByIdDesc :many
+SELECT id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at FROM users 
+WHERE deleted_at IS NULL
+AND (
+    $3::TEXT IS NULL 
+    OR $3::TEXT = ''
+    OR email ILIKE '%' || $3 || '%'
+    OR fullname ILIKE '%' || $3 || '%'
+)
+ORDER BY id DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListUsersOrderByIdDescParams struct {
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
+	Search string `json:"search"`
+}
+
+func (q *Queries) ListUsersOrderByIdDesc(ctx context.Context, arg ListUsersOrderByIdDescParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsersOrderByIdDesc, arg.Limit, arg.Offset, arg.Search)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []User{}
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.Email,
+			&i.Password,
+			&i.Fullname,
+			&i.Age,
+			&i.Status,
+			&i.Level,
+			&i.DeletedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const restoreUser = `-- name: RestoreUser :one
 UPDATE users
 SET deleted_at = NULL

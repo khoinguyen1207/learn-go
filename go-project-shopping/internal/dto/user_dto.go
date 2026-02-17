@@ -26,9 +26,11 @@ type GetUserByUuidRequest struct {
 }
 
 type GetUsersRequest struct {
-	Search string `form:"search" binding:"omitempty,min=3,max=100"`
-	Page   int    `form:"page" binding:"omitempty,gte=1"`
-	Limit  int    `form:"limit" binding:"omitempty,gte=1,lte=100"`
+	Search  string `form:"search" binding:"omitempty,min=3,max=100"`
+	Page    int32  `form:"page" binding:"omitempty,gte=1"`
+	Limit   int32  `form:"limit" binding:"omitempty,gte=1,lte=500"`
+	OrderBy string `form:"order_by" binding:"omitempty,oneof=id created_at"`
+	Sort    string `form:"sort" binding:"omitempty,oneof=asc desc"`
 }
 
 type CreateUserRequest struct {
@@ -87,8 +89,12 @@ func MapToUserDTO(user sqlc.User) *UserDTO {
 	return userDto
 }
 
-func MapUsersToDto() []UserDTO {
-	return []UserDTO{}
+func MapUsersToDto(users []sqlc.User) []UserDTO {
+	userDtos := make([]UserDTO, 0, len(users))
+	for _, user := range users {
+		userDtos = append(userDtos, *MapToUserDTO(user))
+	}
+	return userDtos
 }
 
 func mapStatusText(status int) string {
