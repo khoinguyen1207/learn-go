@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"project-shopping/internal/config"
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/repository"
 	"project-shopping/internal/utils"
@@ -28,7 +29,7 @@ func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sor
 	}
 
 	if limit <= 0 {
-		limit = 10
+		limit = config.DEFAULT_LIMIT
 	}
 
 	offset := (page - 1) * limit
@@ -43,7 +44,7 @@ func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sor
 
 	users, err := us.repo.GetAll(ctx, search, orderBy, sort, limit, offset)
 	if err != nil {
-		return []sqlc.User{}, err
+		return []sqlc.User{}, utils.WrapError(err, "Failed to get users", utils.CodeBadRequest)
 	}
 
 	return users, nil
