@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	CountUsers(ctx context.Context, search string) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	ListUsersOrderByCreatedAtAsc(ctx context.Context, arg ListUsersOrderByCreatedAtAscParams) ([]User, error)
 	ListUsersOrderByCreatedAtDesc(ctx context.Context, arg ListUsersOrderByCreatedAtDescParams) ([]User, error)

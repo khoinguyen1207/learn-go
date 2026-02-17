@@ -31,17 +31,22 @@ func ErrorResponse(ctx *gin.Context, err error) {
 }
 
 func SuccessResponse(ctx *gin.Context, message string, data any, status ...int) {
+	statusCode := http.StatusOK
 	if len(status) > 0 {
-		ctx.JSON(status[0], gin.H{
-			"message": message,
-			"data":    data,
-		})
-		return
+		statusCode = status[0]
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(statusCode, gin.H{
 		"message": message,
 		"data":    data,
+	})
+}
+
+func SuccessWithPagination(ctx *gin.Context, message string, data any, pagination *utils.Pagination) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":    message,
+		"data":       data,
+		"pagination": pagination,
 	})
 }
 

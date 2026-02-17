@@ -23,7 +23,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 	}
 }
 
-func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sort string, page, limit int32) ([]sqlc.User, error) {
+func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sort string, page, limit int32) ([]sqlc.User, int32, error) {
 	if page <= 0 {
 		page = 1
 	}
@@ -44,10 +44,15 @@ func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sor
 
 	users, err := us.repo.GetAll(ctx, search, orderBy, sort, limit, offset)
 	if err != nil {
-		return []sqlc.User{}, utils.WrapError(err, "Failed to get users", utils.CodeBadRequest)
+		return []sqlc.User{}, 0, utils.WrapError(err, "Failed to get users", utils.CodeBadRequest)
 	}
 
-	return users, nil
+	totalUsers, err := us.repo.CountUsers(ctx, search)
+	if err != nil {
+		return []sqlc.User{}, 0, utils.WrapError(err, "Failed to get total users", utils.CodeBadRequest)
+	}
+
+	return users, int32(totalUsers), nil
 }
 
 func (us *userService) GetUserByID(id string) error {

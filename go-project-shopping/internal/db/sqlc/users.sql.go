@@ -11,6 +11,24 @@ import (
 	"github.com/google/uuid"
 )
 
+const countUsers = `-- name: CountUsers :one
+SELECT COUNT(*) FROM users
+WHERE deleted_at IS NULL
+AND (
+    $1::TEXT IS NULL 
+    OR $1::TEXT = ''
+    OR email ILIKE '%' || $1 || '%'
+    OR fullname ILIKE '%' || $1 || '%'
+)
+`
+
+func (q *Queries) CountUsers(ctx context.Context, search string) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsers, search)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (email, password, fullname, age, status, level) 
 VALUES ($1, $2, $3, $4, $5, $6) 

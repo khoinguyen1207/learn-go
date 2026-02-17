@@ -57,6 +57,15 @@ func (ur *userRepository) GetAll(ctx context.Context, search, orderBy, sort stri
 	return data, nil
 }
 
+func (ur *userRepository) CountUsers(ctx context.Context, search string) (int64, error) {
+	count, err := ur.db.CountUsers(ctx, search)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (ur *userRepository) Create(ctx context.Context, arg sqlc.CreateUserParams) (sqlc.User, error) {
 	data, err := ur.db.CreateUser(ctx, arg)
 	if err != nil {

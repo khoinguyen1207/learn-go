@@ -73,3 +73,13 @@ AND (
 )
 ORDER BY id DESC
 LIMIT $1 OFFSET $2;
+
+-- name: CountUsers :one
+SELECT COUNT(*) FROM users
+WHERE deleted_at IS NULL
+AND (
+    sqlc.narg(search)::TEXT IS NULL 
+    OR sqlc.narg(search)::TEXT = ''
+    OR email ILIKE '%' || sqlc.arg(search) || '%'
+    OR fullname ILIKE '%' || sqlc.arg(search) || '%'
+);

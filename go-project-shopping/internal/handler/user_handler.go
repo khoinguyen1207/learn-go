@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"project-shopping/internal/dto"
 	"project-shopping/internal/service"
+	"project-shopping/internal/utils"
 	"project-shopping/internal/validation"
 
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,7 @@ func (uh *UserHandler) GetUsers(ctx *gin.Context) {
 		return
 	}
 
-	users, err := uh.service.GetUsers(ctx.Request.Context(), params.Search, params.OrderBy, params.Sort, params.Page, params.Limit)
+	users, totalUsers, err := uh.service.GetUsers(ctx.Request.Context(), params.Search, params.OrderBy, params.Sort, params.Page, params.Limit)
 	if err != nil {
 		dto.ErrorResponse(ctx, err)
 		return
@@ -34,7 +35,9 @@ func (uh *UserHandler) GetUsers(ctx *gin.Context) {
 
 	userDtos := dto.MapUsersToDto(users)
 
-	dto.SuccessResponse(ctx, "Get users successfully", userDtos)
+	pagination := utils.NewPagination(params.Page, params.Limit, totalUsers)
+
+	dto.SuccessWithPagination(ctx, "Get users successfully", userDtos, pagination)
 }
 
 func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
