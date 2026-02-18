@@ -42,7 +42,7 @@ func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sor
 		sort = "desc"
 	}
 
-	users, err := us.repo.GetAll(ctx, search, orderBy, sort, limit, offset)
+	users, err := us.repo.GetAllV2(ctx, search, orderBy, sort, limit, offset)
 	if err != nil {
 		return []sqlc.User{}, 0, utils.WrapError(err, "Failed to get users", utils.CodeBadRequest)
 	}

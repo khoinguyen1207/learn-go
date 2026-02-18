@@ -6,7 +6,7 @@ type Pagination struct {
 	TotalRecords int32 `json:"total_records"`
 	TotalPages   int32 `json:"total_pages"`
 	HasNext      bool  `json:"has_next"`
-	HasPrev      bool  `json:"has_previous"`
+	HasPrev      bool  `json:"has_prev"`
 }
 
 func NewPagination(page, limit, totalRecords int32) *Pagination {

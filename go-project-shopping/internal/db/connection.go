@@ -14,7 +14,8 @@ import (
 	"github.com/jackc/pgx/v5/tracelog"
 )
 
-var DB sqlc.Querier
+var db sqlc.Querier
+var dbpool *pgxpool.Pool
 
 func InitDB(cfg *config.Config) error {
 	dns := cfg.Db.DatabaseUrl
@@ -44,7 +45,7 @@ func InitDB(cfg *config.Config) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	dbpool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	dbpool, err = pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		return fmt.Errorf("Unable to create database connection pool: %v", err)
 	}
@@ -54,9 +55,17 @@ func InitDB(cfg *config.Config) error {
 		return fmt.Errorf("Could not connect to the database: %v", err)
 	}
 
-	DB = sqlc.New(dbpool)
+	db = sqlc.New(dbpool)
 
 	log.Println("Connected to the database successfully!")
 
 	return nil
+}
+
+func GetDB() sqlc.Querier {
+	return db
+}
+
+func GetDBPool() *pgxpool.Pool {
+	return dbpool
 }

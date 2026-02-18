@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"project-shopping/internal/db"
 	"project-shopping/internal/db/sqlc"
 
 	"github.com/google/uuid"
@@ -55,6 +57,65 @@ func (ur *userRepository) GetAll(ctx context.Context, search, orderBy, sort stri
 	}
 
 	return data, nil
+}
+
+func (ur *userRepository) GetAllV2(ctx context.Context, search, orderBy, sort string, limit, offset int32) ([]sqlc.User, error) {
+	allowedOrderBy := map[string]bool{
+		"created_at": true,
+		"id":         true,
+	}
+	if !allowedOrderBy[orderBy] {
+		orderBy = "created_at"
+	}
+
+	direction := "DESC"
+	if sort == "asc" {
+		direction = "ASC"
+	}
+
+	query := fmt.Sprintf(`
+		SELECT * FROM users 
+		WHERE deleted_at IS NULL
+		AND (
+			$1::TEXT IS NULL 
+			OR $1::TEXT = ''
+			OR email ILIKE '%%' || $1::TEXT || '%%'
+			OR fullname ILIKE '%%' || $1::TEXT || '%%'
+		)
+		ORDER BY %s %s 
+		LIMIT $2 OFFSET $3;`, orderBy, direction)
+
+	rows, err := db.GetDBPool().Query(ctx, query, search, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := []sqlc.User{}
+	for rows.Next() {
+		var i sqlc.User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.Email,
+			&i.Password,
+			&i.Fullname,
+			&i.Age,
+			&i.Status,
+			&i.Level,
+			&i.DeletedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }
 
 func (ur *userRepository) CountUsers(ctx context.Context, search string) (int64, error) {

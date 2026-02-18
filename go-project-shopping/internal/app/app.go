@@ -43,7 +43,7 @@ func NewApplication(cfg *config.Config) *Application {
 	}
 
 	moduleContext := &ModuleContext{
-		db: db.DB,
+		db: db.GetDB(),
 	}
 
 	modules := []Module{
