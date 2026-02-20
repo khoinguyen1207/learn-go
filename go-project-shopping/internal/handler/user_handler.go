@@ -40,14 +40,22 @@ func (uh *UserHandler) GetUsers(ctx *gin.Context) {
 	dto.SuccessWithPagination(ctx, "Get users successfully", userDtos, pagination)
 }
 
-func (uh *UserHandler) GetUserByID(ctx *gin.Context) {
-	var params dto.GetUserByIdRequest
+func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {
+	var params dto.GetUserByUuidRequest
 	if err := ctx.ShouldBindUri(&params); err != nil {
 		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
 		return
 	}
 
-	dto.SuccessResponse(ctx, "Get user successfully", "")
+	user, err := uh.service.GetUserByUUID(ctx.Request.Context(), params.Uuid)
+	if err != nil {
+		dto.ErrorResponse(ctx, err)
+		return
+	}
+
+	userDto := dto.MapToUserDTO(user)
+
+	dto.SuccessResponse(ctx, "Get user successfully", userDto)
 }
 
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {

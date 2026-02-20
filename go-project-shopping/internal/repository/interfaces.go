@@ -15,6 +15,5 @@ type UserRepository interface {
 	Update(ctx context.Context, arg sqlc.UpdateUserParams) (sqlc.User, error)
 	Delete(ctx context.Context, uuid uuid.UUID) (sqlc.User, error)
 	Restore(ctx context.Context, uuid uuid.UUID) (sqlc.User, error)
-	FindById(id string) bool
-	FindByEmail(email string) bool
+	FindByUUID(ctx context.Context, uuid uuid.UUID) (sqlc.User, error)
 }

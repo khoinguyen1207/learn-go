@@ -83,3 +83,7 @@ AND (
     OR email ILIKE '%' || sqlc.arg(search) || '%'
     OR fullname ILIKE '%' || sqlc.arg(search) || '%'
 );
+
+-- name: FindUserByUUID :one
+SELECT * FROM users
+WHERE uuid = $1;

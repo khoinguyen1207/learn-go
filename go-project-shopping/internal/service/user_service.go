@@ -55,8 +55,21 @@ func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sor
 	return users, int32(totalUsers), nil
 }
 
-func (us *userService) GetUserByID(id string) error {
-	return nil
+func (us *userService) GetUserByUUID(ctx context.Context, id string) (sqlc.User, error) {
+	parsedUUID, err := uuid.Parse(id)
+	if err != nil {
+		return sqlc.User{}, utils.WrapError(err, "Invalid UUID format", utils.CodeBadRequest)
+	}
+
+	user, err := us.repo.FindByUUID(ctx, parsedUUID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return sqlc.User{}, utils.NewError("User not found", utils.CodeNotFound)
+		}
+		return sqlc.User{}, utils.WrapError(err, "Failed to get user", utils.CodeBadRequest)
+	}
+
+	return user, nil
 }
 
 func (us *userService) CreateUser(ctx context.Context, input sqlc.CreateUserParams) (sqlc.User, error) {

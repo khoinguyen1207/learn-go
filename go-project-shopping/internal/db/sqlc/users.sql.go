@@ -70,6 +70,30 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const findUserByUUID = `-- name: FindUserByUUID :one
+SELECT id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at FROM users
+WHERE uuid = $1
+`
+
+func (q *Queries) FindUserByUUID(ctx context.Context, argUuid uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, findUserByUUID, argUuid)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Email,
+		&i.Password,
+		&i.Fullname,
+		&i.Age,
+		&i.Status,
+		&i.Level,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listUsersOrderByCreatedAtAsc = `-- name: ListUsersOrderByCreatedAtAsc :many
 SELECT id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at FROM users 
 WHERE deleted_at IS NULL

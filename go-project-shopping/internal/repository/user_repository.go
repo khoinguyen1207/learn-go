@@ -163,10 +163,11 @@ func (ur *userRepository) Restore(ctx context.Context, uuid uuid.UUID) (sqlc.Use
 	return data, nil
 }
 
-func (ur *userRepository) FindById(id string) bool {
-	return false
-}
+func (ur *userRepository) FindByUUID(ctx context.Context, id uuid.UUID) (sqlc.User, error) {
+	user, err := ur.db.FindUserByUUID(ctx, id)
+	if err != nil {
+		return sqlc.User{}, err
+	}
 
-func (ur *userRepository) FindByEmail(email string) bool {
-	return false
+	return user, nil
 }
