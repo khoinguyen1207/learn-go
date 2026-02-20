@@ -57,7 +57,7 @@ func InitDB(cfg *config.Config) error {
 
 	db = sqlc.New(dbpool)
 
-	log.Println("Connected to the database successfully!")
+	log.Println("✅ Connected to the database successfully!")
 
 	return nil
 }
