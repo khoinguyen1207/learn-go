@@ -11,6 +11,7 @@ import (
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/routes"
 	"project-shopping/internal/validation"
+	"project-shopping/pkg/cache"
 	"syscall"
 	"time"
 
@@ -28,7 +29,8 @@ type Application struct {
 }
 
 type ModuleContext struct {
-	db sqlc.Querier
+	db    sqlc.Querier
+	cache cache.CacheService
 }
 
 func NewApplication(cfg *config.Config) *Application {
@@ -42,8 +44,12 @@ func NewApplication(cfg *config.Config) *Application {
 		log.Fatal("Failed to initialize database:", err)
 	}
 
+	redisClient := config.InitRedis(cfg)
+	cacheService := cache.NewCacheService(redisClient)
+
 	moduleContext := &ModuleContext{
-		db: db.GetDB(),
+		db:    db.GetDB(),
+		cache: cacheService,
 	}
 
 	modules := []Module{

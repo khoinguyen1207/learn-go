@@ -9,23 +9,30 @@ type DatabaseConfig struct {
 	DatabaseUrl string
 }
 
-type Config struct {
-	Port string
-	Db   DatabaseConfig
+type RedisConfig struct {
+	Address  string
+	Username string
+	Password string
+	DB       int
 }
 
-var RATE_LIMIT_REQUEST_SECOND int
-var RATE_LIMIT_REQUEST_BURST int
+type Config struct {
+	Port  string
+	Db    DatabaseConfig
+	Redis RedisConfig
+}
 
 func NewConfig() *Config {
-	// Load rate limit settings from environment variables
-	RATE_LIMIT_REQUEST_SECOND = utils.GetEnvAsInt("RATE_LIMIT_REQUEST_SECOND", 5)
-	RATE_LIMIT_REQUEST_BURST = utils.GetEnvAsInt("RATE_LIMIT_REQUEST_BURST", 10)
-
 	return &Config{
 		Port: fmt.Sprintf(":%s", utils.GetEnv("PORT", "8080")),
 		Db: DatabaseConfig{
 			DatabaseUrl: utils.GetEnv("DATABASE_URL", "postgres://user:password@localhost:5432/mydb?sslmode=disable"),
+		},
+		Redis: RedisConfig{
+			Address:  utils.GetEnv("REDIS_ADDRESS", "localhost:6379"),
+			Username: utils.GetEnv("REDIS_USER", ""),
+			Password: utils.GetEnv("REDIS_PASSWORD", ""),
+			DB:       utils.GetEnvAsInt("REDIS_DB", 0),
 		},
 	}
 }

@@ -13,7 +13,7 @@ type UserModule struct {
 
 func NewUserModule(mctx *ModuleContext) *UserModule {
 	userRepository := repository.NewUserRepository(mctx.db)
-	userService := service.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository, mctx.cache)
 	userHandler := handler.NewUserHandler(userService)
 	userRoutes := routes.NewUserRoutes(userHandler)
 

@@ -8,18 +8,21 @@ import (
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/repository"
 	"project-shopping/internal/utils"
+	"project-shopping/pkg/cache"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type userService struct {
-	repo repository.UserRepository
+	repo  repository.UserRepository
+	cache cache.CacheService
 }
 
-func NewUserService(repo repository.UserRepository) UserService {
+func NewUserService(repo repository.UserRepository, cache cache.CacheService) UserService {
 	return &userService{
-		repo: repo,
+		repo:  repo,
+		cache: cache,
 	}
 }
 
@@ -29,7 +32,7 @@ func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sor
 	}
 
 	if limit <= 0 {
-		limit = config.DEFAULT_LIMIT
+		limit = config.LIMIT_ITEMS_PER_PAGE
 	}
 
 	offset := (page - 1) * limit

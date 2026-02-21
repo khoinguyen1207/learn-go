@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"project-shopping/internal/config"
+	"project-shopping/internal/utils"
 	"sync"
 	"time"
 
@@ -21,8 +22,10 @@ var clients = make(map[string]*Client)
 func getRateLimiter(ip string) *rate.Limiter {
 	client, exists := clients[ip]
 	if !exists {
+		RATE_LIMIT_REQUEST_SECOND := utils.GetEnvAsInt("RATE_LIMIT_REQUEST_SECOND", 5)
+		RATE_LIMIT_REQUEST_BURST := utils.GetEnvAsInt("RATE_LIMIT_REQUEST_BURST", 10)
 		// 5 requests per second with a burst of 10
-		limiter := rate.NewLimiter(rate.Limit(config.RATE_LIMIT_REQUEST_SECOND), config.RATE_LIMIT_REQUEST_BURST)
+		limiter := rate.NewLimiter(rate.Limit(RATE_LIMIT_REQUEST_SECOND), RATE_LIMIT_REQUEST_BURST)
 		clients[ip] = &Client{limiter: limiter, lastSeen: time.Now()}
 		return limiter
 	}

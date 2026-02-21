@@ -1,0 +1,41 @@
+package cache
+
+import (
+	"context"
+	"encoding/json"
+	"time"
+
+	"github.com/redis/go-redis/v9"
+)
+
+type cacheService struct {
+	rdb *redis.Client
+}
+
+func NewCacheService(rdb *redis.Client) CacheService {
+	return &cacheService{
+		rdb: rdb,
+	}
+}
+
+func (cs *cacheService) Get(ctx context.Context, key string, dest any) error {
+	data, err := cs.rdb.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return err
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal([]byte(data), dest)
+}
+
+func (cs *cacheService) Set(ctx context.Context, key string, value any, ttl time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
+	return cs.rdb.Set(ctx, key, data, ttl).Err()
+}

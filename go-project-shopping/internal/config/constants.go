@@ -1,4 +1,4 @@
 package config
 
 const RATE_LIMIT_LOG_TTL = 10 // 10s
-const DEFAULT_LIMIT = 10
+const LIMIT_ITEMS_PER_PAGE = 10
