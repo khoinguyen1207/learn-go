@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"project-shopping/internal/config"
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/repository"
 	"project-shopping/internal/utils"
 	"project-shopping/pkg/cache"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -26,7 +28,7 @@ func NewUserService(repo repository.UserRepository, cache cache.CacheService) Us
 	}
 }
 
-func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sort string, page, limit int32) ([]sqlc.User, int32, error) {
+func (us *userService) GetUsers(ctx context.Context, search, orderBy, sort string, page, limit int32) ([]sqlc.User, int32, error) {
 	if page <= 0 {
 		page = 1
 	}
@@ -45,6 +47,17 @@ func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sor
 		sort = "desc"
 	}
 
+	cacheKey := generateCacheKey(search, orderBy, sort, page, limit)
+	var cacheData struct {
+		Users      []sqlc.User `json:"users"`
+		TotalUsers int32       `json:"total_users"`
+	}
+
+	err := us.cache.Get(ctx, cacheKey, &cacheData)
+	if err == nil && cacheData.Users != nil {
+		return cacheData.Users, cacheData.TotalUsers, nil
+	}
+
 	users, err := us.repo.GetAllV2(ctx, search, orderBy, sort, limit, offset)
 	if err != nil {
 		return []sqlc.User{}, 0, utils.WrapError(err, "Failed to get users", utils.CodeBadRequest)
@@ -54,6 +67,16 @@ func (us *userService) GetUsers(ctx context.Context, search string, orderBy, sor
 	if err != nil {
 		return []sqlc.User{}, 0, utils.WrapError(err, "Failed to get total users", utils.CodeBadRequest)
 	}
+
+	cacheData = struct {
+		Users      []sqlc.User `json:"users"`
+		TotalUsers int32       `json:"total_users"`
+	}{
+		Users:      users,
+		TotalUsers: int32(totalUsers),
+	}
+
+	us.cache.Set(ctx, cacheKey, cacheData, 5*time.Minute)
 
 	return users, int32(totalUsers), nil
 }
@@ -150,4 +173,14 @@ func (us *userService) RestoreUser(ctx context.Context, id string) (sqlc.User, e
 	}
 
 	return user, nil
+}
+
+func generateCacheKey(search, orderBy, sort string, page, limit int32) string {
+	if search == "" {
+		search = "all"
+	}
+	orderBy = utils.NormalizeString(orderBy)
+	sort = utils.NormalizeString(sort)
+
+	return fmt.Sprintf("users:search=%s:orderBy=%s:sort=%s:page=%d:limit=%d", search, orderBy, sort, page, limit)
 }
