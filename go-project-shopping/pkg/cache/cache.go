@@ -39,3 +39,25 @@ func (cs *cacheService) Set(ctx context.Context, key string, value any, ttl time
 
 	return cs.rdb.Set(ctx, key, data, ttl).Err()
 }
+
+func (cs *cacheService) Clear(ctx context.Context, pattern string) error {
+	cursor := uint64(0)
+
+	for {
+		keys, nextCursor, err := cs.rdb.Scan(ctx, cursor, pattern, 100).Result()
+		if err != nil {
+			return err
+		}
+
+		if len(keys) > 0 {
+			cs.rdb.Del(ctx, keys...)
+		}
+
+		cursor = nextCursor
+		if cursor == 0 {
+			break
+		}
+	}
+
+	return nil
+}

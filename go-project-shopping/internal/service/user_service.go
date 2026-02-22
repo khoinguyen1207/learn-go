@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"project-shopping/internal/config"
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/repository"
@@ -76,7 +77,7 @@ func (us *userService) GetUsers(ctx context.Context, search, orderBy, sort strin
 		TotalUsers: int32(totalUsers),
 	}
 
-	us.cache.Set(ctx, cacheKey, cacheData, 5*time.Minute)
+	us.cache.Set(ctx, cacheKey, cacheData, 10*time.Minute)
 
 	return users, int32(totalUsers), nil
 }
@@ -116,6 +117,10 @@ func (us *userService) CreateUser(ctx context.Context, input sqlc.CreateUserPara
 		return sqlc.User{}, utils.WrapError(err, "Failed to create user", utils.CodeBadRequest)
 	}
 
+	if err := us.cache.Clear(ctx, "users:*"); err != nil {
+		log.Println("Failed to clear user cache:", err)
+	}
+
 	return user, nil
 }
 
@@ -138,6 +143,10 @@ func (us *userService) UpdateUser(ctx context.Context, input sqlc.UpdateUserPara
 		return sqlc.User{}, utils.WrapError(err, "Failed to update user", utils.CodeBadRequest)
 	}
 
+	if err := us.cache.Clear(ctx, "users:*"); err != nil {
+		log.Println("Failed to clear user cache:", err)
+	}
+
 	return user, nil
 }
 
@@ -153,6 +162,10 @@ func (us *userService) DeleteUser(ctx context.Context, id string) (sqlc.User, er
 			return sqlc.User{}, utils.NewError("User not found or already deleted", utils.CodeNotFound)
 		}
 		return sqlc.User{}, utils.WrapError(err, "Failed to delete user", utils.CodeBadRequest)
+	}
+
+	if err := us.cache.Clear(ctx, "users:*"); err != nil {
+		log.Println("Failed to clear user cache:", err)
 	}
 
 	return user, nil
