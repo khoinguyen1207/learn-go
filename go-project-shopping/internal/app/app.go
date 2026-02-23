@@ -11,6 +11,7 @@ import (
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/routes"
 	"project-shopping/internal/validation"
+	"project-shopping/pkg/auth"
 	"project-shopping/pkg/cache"
 	"syscall"
 	"time"
@@ -31,6 +32,7 @@ type Application struct {
 type ModuleContext struct {
 	db    sqlc.Querier
 	cache cache.CacheService
+	jwt   auth.JWTService
 }
 
 func NewApplication(cfg *config.Config) *Application {
@@ -46,14 +48,17 @@ func NewApplication(cfg *config.Config) *Application {
 
 	redisClient := config.InitRedis(cfg)
 	cacheService := cache.NewCacheService(redisClient)
+	jwtService := auth.NewJWTService(&cfg.Jwt)
 
 	moduleContext := &ModuleContext{
 		db:    db.GetDB(),
 		cache: cacheService,
+		jwt:   jwtService,
 	}
 
 	modules := []Module{
 		NewUserModule(moduleContext),
+		NewAuthModule(moduleContext),
 	}
 
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)

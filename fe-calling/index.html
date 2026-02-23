@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      console.log("Testing API call...");
+      async function testApi() {
+        try {
+          const response = await fetch("http://localhost:8080/api/v1/users", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "x-api-key": "21b8f79c-ba0e-485b-8a00-72b425a083a0",
+            },
+          });
+          const data = await response.json();
+          console.log(data);
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      testApi();
+    </script>
+  </head>
+  <body>
+    Test calling API
+  </body>
+</html>

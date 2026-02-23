@@ -87,3 +87,8 @@ AND (
 -- name: FindUserByUUID :one
 SELECT * FROM users
 WHERE uuid = $1;
+
+-- name: FindUserByEmail :one
+SELECT * FROM users
+WHERE deleted_at IS NULL
+AND email = $1;

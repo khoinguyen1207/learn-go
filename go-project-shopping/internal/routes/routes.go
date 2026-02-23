@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"net/http"
 	"project-shopping/internal/middleware"
 	"project-shopping/internal/utils"
 	"time"
@@ -19,15 +20,15 @@ func RegisterRoutes(r *gin.Engine, routes ...Route) {
 	recoveryLogger := utils.NewLoggerWithPath("internal/logs/recovery.log", "error")
 	rateLimitLogger := utils.NewLoggerWithPath("internal/logs/rate_limit.log", "warn")
 
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "X-Api-Key"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	r.Use(
 		middleware.RateLimiterMiddleware(rateLimitLogger),
@@ -42,4 +43,11 @@ func RegisterRoutes(r *gin.Engine, routes ...Route) {
 	for _, route := range routes {
 		route.Register(apiGroup)
 	}
+
+	r.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": "Route not found",
+			"path":  ctx.Request.URL.Path,
+		})
+	})
 }

@@ -70,6 +70,31 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const findUserByEmail = `-- name: FindUserByEmail :one
+SELECT id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at FROM users
+WHERE deleted_at IS NULL
+AND email = $1
+`
+
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, findUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Email,
+		&i.Password,
+		&i.Fullname,
+		&i.Age,
+		&i.Status,
+		&i.Level,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const findUserByUUID = `-- name: FindUserByUUID :one
 SELECT id, uuid, email, password, fullname, age, status, level, deleted_at, created_at, updated_at FROM users
 WHERE uuid = $1

@@ -16,4 +16,5 @@ type UserRepository interface {
 	Delete(ctx context.Context, uuid uuid.UUID) (sqlc.User, error)
 	Restore(ctx context.Context, uuid uuid.UUID) (sqlc.User, error)
 	FindByUUID(ctx context.Context, uuid uuid.UUID) (sqlc.User, error)
+	FindByEmail(ctx context.Context, email string) (sqlc.User, error)
 }

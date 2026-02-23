@@ -16,10 +16,17 @@ type RedisConfig struct {
 	DB       int
 }
 
+type JwtConfig struct {
+	SecretKey              string
+	AccessTokenExpiration  string
+	RefreshTokenExpiration string
+}
+
 type Config struct {
 	Port  string
 	Db    DatabaseConfig
 	Redis RedisConfig
+	Jwt   JwtConfig
 }
 
 func NewConfig() *Config {
@@ -33,6 +40,11 @@ func NewConfig() *Config {
 			Username: utils.GetEnv("REDIS_USER", ""),
 			Password: utils.GetEnv("REDIS_PASSWORD", ""),
 			DB:       utils.GetEnvAsInt("REDIS_DB", 0),
+		},
+		Jwt: JwtConfig{
+			SecretKey:              utils.GetEnv("JWT_SECRET_KEY", "your_secret_key"),
+			AccessTokenExpiration:  utils.GetEnv("ACCESS_TOKEN_EXPIRATION", "15m"),
+			RefreshTokenExpiration: utils.GetEnv("REFRESH_TOKEN_EXPIRATION", "7d"),
 		},
 	}
 }
