@@ -2,17 +2,20 @@ package routes
 
 import (
 	"project-shopping/internal/handler"
+	"project-shopping/pkg/auth"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthRoutes struct {
-	handler *handler.AuthHandler
+	handler    *handler.AuthHandler
+	jwtService auth.JWTService
 }
 
-func NewAuthRoutes(handler *handler.AuthHandler) *AuthRoutes {
+func NewAuthRoutes(handler *handler.AuthHandler, jwtService auth.JWTService) *AuthRoutes {
 	return &AuthRoutes{
-		handler: handler,
+		handler:    handler,
+		jwtService: jwtService,
 	}
 }
 

@@ -57,6 +57,46 @@ func (js *jwtService) GenerateRefreshToken(uuid, email string, role int32) (stri
 	return "", nil
 }
 
+func (js *jwtService) VerifyToken(tokenStr string) (*jwt.Token, jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) {
+		return []byte(js.cfg.Jwt.SecretKey), nil
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if !token.Valid {
+		return nil, nil, jwt.ErrSignatureInvalid
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, nil, jwt.ErrTokenInvalidClaims
+	}
+
+	return token, claims, nil
+}
+
+func (js *jwtService) DecryptAccessTokenPayload(claims jwt.MapClaims) (*EncryptedPayload, error) {
+	encryptedData, ok := (claims)["data"].(string)
+	if !ok {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+
+	decrypted, err := utils.DecryptAES(encryptedData, []byte(js.cfg.EncryptionKey))
+	if err != nil {
+		return nil, err
+	}
+
+	var payload EncryptedPayload
+	err = json.Unmarshal(decrypted, &payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return &payload, nil
+}
+
 func parseExpirationTime(durationStr string, defaultDuration time.Duration) time.Duration {
 	duration, err := time.ParseDuration(durationStr)
 	if err != nil {

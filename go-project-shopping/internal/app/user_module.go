@@ -15,7 +15,7 @@ func NewUserModule(mctx *ModuleContext) *UserModule {
 	userRepository := repository.NewUserRepository(mctx.db)
 	userService := service.NewUserService(userRepository, mctx.cache)
 	userHandler := handler.NewUserHandler(userService)
-	userRoutes := routes.NewUserRoutes(userHandler)
+	userRoutes := routes.NewUserRoutes(userHandler, mctx.jwt)
 
 	return &UserModule{
 		routes: userRoutes,

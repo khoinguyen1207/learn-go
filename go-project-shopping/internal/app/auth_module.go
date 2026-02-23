@@ -15,7 +15,7 @@ func NewAuthModule(mctx *ModuleContext) *AuthModule {
 	userRepository := repository.NewUserRepository(mctx.db)
 	authService := service.NewAuthService(userRepository, mctx.jwt)
 	authHandler := handler.NewAuthHandler(authService)
-	authRoutes := routes.NewAuthRoutes(authHandler)
+	authRoutes := routes.NewAuthRoutes(authHandler, mctx.jwt)
 
 	return &AuthModule{
 		routes: authRoutes,
