@@ -1,6 +1,6 @@
 package auth
 
 type JWTService interface {
-	GenerateAccessToken(userID string, role int32) (string, error)
-	GenerateRefreshToken(userID string, role int32) (string, error)
+	GenerateAccessToken(uuid, email string, role int32) (string, error)
+	GenerateRefreshToken(uuid, email string, role int32) (string, error)
 }

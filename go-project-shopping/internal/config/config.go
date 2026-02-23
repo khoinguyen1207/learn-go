@@ -23,10 +23,11 @@ type JwtConfig struct {
 }
 
 type Config struct {
-	Port  string
-	Db    DatabaseConfig
-	Redis RedisConfig
-	Jwt   JwtConfig
+	Port          string
+	Db            DatabaseConfig
+	Redis         RedisConfig
+	Jwt           JwtConfig
+	EncryptionKey string
 }
 
 func NewConfig() *Config {
@@ -46,5 +47,6 @@ func NewConfig() *Config {
 			AccessTokenExpiration:  utils.GetEnv("ACCESS_TOKEN_EXPIRATION", "15m"),
 			RefreshTokenExpiration: utils.GetEnv("REFRESH_TOKEN_EXPIRATION", "7d"),
 		},
+		EncryptionKey: utils.GetEnv("ENCRYPTION_KEY", "ffdffafae19249232834372926bfefe7"),
 	}
 }

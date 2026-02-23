@@ -48,7 +48,7 @@ func NewApplication(cfg *config.Config) *Application {
 
 	redisClient := config.InitRedis(cfg)
 	cacheService := cache.NewCacheService(redisClient)
-	jwtService := auth.NewJWTService(&cfg.Jwt)
+	jwtService := auth.NewJWTService(cfg)
 
 	moduleContext := &ModuleContext{
 		db:    db.GetDB(),

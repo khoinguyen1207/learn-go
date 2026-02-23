@@ -34,7 +34,7 @@ func (as *authService) Login(ctx context.Context, email, password string) (strin
 		return "", utils.NewError("Invalid email or password", utils.CodeUnauthorized)
 	}
 
-	token, err := as.jwtSrv.GenerateAccessToken(user.Uuid.String(), user.Level)
+	token, err := as.jwtSrv.GenerateAccessToken(user.Uuid.String(), user.Email, user.Level)
 	if err != nil {
 		return "", utils.WrapError(err, "Failed to generate access token", utils.CodeInternalServerError)
 	}
