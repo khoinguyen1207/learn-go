@@ -61,3 +61,7 @@ func (cs *cacheService) Clear(ctx context.Context, pattern string) error {
 
 	return nil
 }
+
+func (cs *cacheService) Delete(ctx context.Context, key string) error {
+	return cs.rdb.Del(ctx, key).Err()
+}

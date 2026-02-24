@@ -19,7 +19,7 @@ func AuthMiddleware(jwtService auth.JWTService) gin.HandlerFunc {
 		}
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 
-		_, claims, err := jwtService.VerifyToken(token)
+		tokenPayload, err := jwtService.VerifyAccessToken(token)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"message": "Invalid token",
@@ -27,16 +27,8 @@ func AuthMiddleware(jwtService auth.JWTService) gin.HandlerFunc {
 			return
 		}
 
-		encryptedPayload, err := jwtService.DecryptAccessTokenPayload(claims)
-		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Invalid token",
-			})
-			return
-		}
-
-		ctx.Set("user_id", encryptedPayload.UserID)
-		ctx.Set("role", encryptedPayload.Role)
+		ctx.Set("user_id", tokenPayload.UserID)
+		ctx.Set("role", tokenPayload.Role)
 
 		ctx.Next()
 	}

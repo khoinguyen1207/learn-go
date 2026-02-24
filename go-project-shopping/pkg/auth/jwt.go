@@ -63,29 +63,30 @@ func (js *jwtService) GenerateAccessToken(user_id string, role int32) (string, e
 func (js *jwtService) GenerateRefreshToken(user_id string, role int32) (RefreshToken, error) {
 	expirationTime := parseExpirationTime(js.cfg.Jwt.RefreshTokenExpiration, 7*24*time.Hour)
 
-	payload := RefreshToken{
-		UserId:    user_id,
-		SessionId: uuid.New().String(),
-		ExpiresAt: time.Now().Add(expirationTime),
-	}
+	jti := uuid.New().String()
+	expiresAt := time.Now().Add(expirationTime)
 
 	claims := jwt.MapClaims{
-		"user_id": payload.UserId,
+		"user_id": user_id,
 		"role":    role,
 		"type":    "refresh",
-		"jti":     payload.SessionId,
+		"jti":     jti,
 		"iat":     time.Now().Unix(),
-		"exp":     payload.ExpiresAt.Unix(),
+		"exp":     expiresAt.Unix(),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	refreshToken, err := token.SignedString([]byte(js.cfg.Jwt.SecretKey))
+	rawToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := rawToken.SignedString([]byte(js.cfg.Jwt.SecretKey))
 	if err != nil {
 		return RefreshToken{}, err
 	}
-	payload.Token = refreshToken
 
-	return payload, nil
+	return RefreshToken{
+		Token:     token,
+		UserId:    user_id,
+		SessionId: jti,
+		ExpiresAt: expiresAt,
+	}, nil
 }
 
 func (js *jwtService) VerifyToken(tokenStr string) (*jwt.Token, jwt.MapClaims, error) {
@@ -108,7 +109,12 @@ func (js *jwtService) VerifyToken(tokenStr string) (*jwt.Token, jwt.MapClaims, e
 	return token, claims, nil
 }
 
-func (js *jwtService) DecryptAccessTokenPayload(claims jwt.MapClaims) (*EncryptedPayload, error) {
+func (js *jwtService) VerifyAccessToken(token string) (*EncryptedPayload, error) {
+	_, claims, err := js.VerifyToken(token)
+	if err != nil {
+		return nil, err
+	}
+
 	encryptedData, ok := (claims)["data"].(string)
 	if !ok {
 		return nil, jwt.ErrTokenInvalidClaims
@@ -126,6 +132,26 @@ func (js *jwtService) DecryptAccessTokenPayload(claims jwt.MapClaims) (*Encrypte
 	}
 
 	return &payload, nil
+}
+
+func (js *jwtService) VerifyRefreshToken(token string) (*RefreshToken, error) {
+	_, claims, err := js.VerifyToken(token)
+	if err != nil {
+		return nil, err
+	}
+
+	userId, _ := claims["user_id"].(string)
+	jti, _ := claims["jti"].(string)
+	exp, _ := claims["exp"].(float64)
+	if userId == "" || jti == "" || exp == 0 {
+		return nil, jwt.ErrTokenInvalidClaims
+	}
+
+	return &RefreshToken{
+		UserId:    userId,
+		SessionId: jti,
+		ExpiresAt: time.Unix(int64(exp), 0),
+	}, nil
 }
 
 func parseExpirationTime(durationStr string, defaultDuration time.Duration) time.Duration {

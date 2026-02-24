@@ -31,7 +31,7 @@ func (ah *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	response := dto.LoginResponse{
+	response := dto.TokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
@@ -46,4 +46,25 @@ func (ah *AuthHandler) Register(ctx *gin.Context) {
 
 func (ah *AuthHandler) Logout(ctx *gin.Context) {
 
+}
+
+func (ah *AuthHandler) RefreshToken(ctx *gin.Context) {
+	var params dto.RefreshTokenRequest
+	if err := ctx.ShouldBindJSON(&params); err != nil {
+		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
+
+	accessToken, refreshToken, err := ah.service.RefreshToken(ctx.Request.Context(), params.RefreshToken)
+	if err != nil {
+		dto.ErrorResponse(ctx, err)
+		return
+	}
+
+	response := dto.TokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+
+	dto.SuccessResponse(ctx, "Refresh token successfully", response)
 }
