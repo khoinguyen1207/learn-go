@@ -45,7 +45,18 @@ func (ah *AuthHandler) Register(ctx *gin.Context) {
 }
 
 func (ah *AuthHandler) Logout(ctx *gin.Context) {
+	var params dto.RefreshTokenRequest
+	if err := ctx.ShouldBindJSON(&params); err != nil {
+		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
+	err := ah.service.Logout(ctx.Request.Context(), params.RefreshToken)
+	if err != nil {
+		dto.ErrorResponse(ctx, err)
+		return
+	}
 
+	dto.SuccessResponse(ctx, "Logout successfully", nil)
 }
 
 func (ah *AuthHandler) RefreshToken(ctx *gin.Context) {

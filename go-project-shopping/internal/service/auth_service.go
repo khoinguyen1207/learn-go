@@ -63,15 +63,14 @@ func (as *authService) RefreshToken(ctx context.Context, token string) (string, 
 	// Verify the refresh token
 	tokenPayload, err := as.jwtSrv.VerifyRefreshToken(token)
 	if err != nil {
-		return "", "", utils.NewError("Invalid token", utils.CodeUnauthorized)
+		return "", "", utils.NewError("Token invalid", utils.CodeUnauthorized)
 	}
 
 	// Check if the refresh token exists
 	cacheKey := fmt.Sprintf("session:%s", tokenPayload.SessionId)
-	var refreshToken auth.RefreshToken
-	err = as.cache.Get(ctx, cacheKey, &refreshToken)
-	if err != nil || refreshToken.Token != token {
-		return "", "", utils.NewError("Invalid token or expired", utils.CodeUnauthorized)
+	exists, err := as.cache.Exists(ctx, cacheKey)
+	if err != nil || !exists {
+		return "", "", utils.NewError("Token invalid or expired", utils.CodeUnauthorized)
 	}
 
 	userUuid, _ := uuid.Parse(tokenPayload.UserId)
@@ -108,6 +107,17 @@ func (as *authService) Register(ctx context.Context, email, password string) err
 	return nil
 }
 
-func (as *authService) Logout(ctx context.Context, token string) error {
+func (as *authService) Logout(ctx context.Context, refreshToken string) error {
+	tokenPayload, err := as.jwtSrv.VerifyRefreshToken(refreshToken)
+	if err != nil {
+		return utils.NewError("Token invalid", utils.CodeUnauthorized)
+	}
+
+	cacheKey := fmt.Sprintf("session:%s", tokenPayload.SessionId)
+	err = as.cache.Delete(ctx, cacheKey)
+	if err != nil {
+		return utils.WrapError(err, "Failed to revoke token", utils.CodeInternalServerError)
+	}
+
 	return nil
 }

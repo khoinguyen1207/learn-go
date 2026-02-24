@@ -65,3 +65,12 @@ func (cs *cacheService) Clear(ctx context.Context, pattern string) error {
 func (cs *cacheService) Delete(ctx context.Context, key string) error {
 	return cs.rdb.Del(ctx, key).Err()
 }
+
+func (cs *cacheService) Exists(ctx context.Context, key string) (bool, error) {
+	count, err := cs.rdb.Exists(ctx, key).Result()
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
