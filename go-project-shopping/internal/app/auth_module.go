@@ -13,7 +13,7 @@ type AuthModule struct {
 
 func NewAuthModule(mctx *ModuleContext) *AuthModule {
 	userRepository := repository.NewUserRepository(mctx.db)
-	authService := service.NewAuthService(userRepository, mctx.jwt)
+	authService := service.NewAuthService(userRepository, mctx.jwt, mctx.cache)
 	authHandler := handler.NewAuthHandler(authService)
 	authRoutes := routes.NewAuthRoutes(authHandler, mctx.jwt)
 

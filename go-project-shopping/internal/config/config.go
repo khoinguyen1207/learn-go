@@ -45,7 +45,7 @@ func NewConfig() *Config {
 		Jwt: JwtConfig{
 			SecretKey:              utils.GetEnv("JWT_SECRET_KEY", "your_secret_key"),
 			AccessTokenExpiration:  utils.GetEnv("ACCESS_TOKEN_EXPIRATION", "15m"),
-			RefreshTokenExpiration: utils.GetEnv("REFRESH_TOKEN_EXPIRATION", "7d"),
+			RefreshTokenExpiration: utils.GetEnv("REFRESH_TOKEN_EXPIRATION", "168h"),
 		},
 		EncryptionKey: utils.GetEnv("ENCRYPTION_KEY", "ffdffafae19249232834372926bfefe7"),
 	}

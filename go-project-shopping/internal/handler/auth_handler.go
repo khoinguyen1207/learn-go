@@ -25,14 +25,15 @@ func (ah *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := ah.service.Login(ctx.Request.Context(), params.Email, params.Password)
+	accessToken, refreshToken, err := ah.service.Login(ctx.Request.Context(), params.Email, params.Password)
 	if err != nil {
 		dto.ErrorResponse(ctx, err)
 		return
 	}
 
 	response := dto.LoginResponse{
-		AccessToken: token,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	dto.SuccessResponse(ctx, "Login successfully", response)

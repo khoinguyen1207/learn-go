@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type jwtService struct {
@@ -16,7 +17,13 @@ type jwtService struct {
 type EncryptedPayload struct {
 	UserID string `json:"user_id"`
 	Role   int32  `json:"role"`
-	Type   string `json:"type"`
+}
+
+type RefreshToken struct {
+	Token     string    `json:"token"`
+	UserId    string    `json:"user_id"`
+	SessionId string    `json:"session_id"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 func NewJWTService(cfg *config.Config) JWTService {
@@ -25,11 +32,10 @@ func NewJWTService(cfg *config.Config) JWTService {
 	}
 }
 
-func (js *jwtService) GenerateAccessToken(uuid, email string, role int32) (string, error) {
+func (js *jwtService) GenerateAccessToken(user_id string, role int32) (string, error) {
 	data := EncryptedPayload{
-		UserID: uuid,
+		UserID: user_id,
 		Role:   role,
-		Type:   "access",
 	}
 	rawData, err := json.Marshal(data)
 	if err != nil {
@@ -41,20 +47,45 @@ func (js *jwtService) GenerateAccessToken(uuid, email string, role int32) (strin
 		return "", err
 	}
 
-	jwtConfig := js.cfg.Jwt
-	expirationTime := parseExpirationTime(jwtConfig.AccessTokenExpiration, 15*time.Minute)
+	expirationTime := parseExpirationTime(js.cfg.Jwt.AccessTokenExpiration, 15*time.Minute)
 	claims := jwt.MapClaims{
 		"data": encrypted,
+		"type": "access",
+		"jti":  uuid.New().String(),
 		"iat":  time.Now().Unix(),
 		"exp":  time.Now().Add(expirationTime).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(jwtConfig.SecretKey))
+	return token.SignedString([]byte(js.cfg.Jwt.SecretKey))
 }
 
-func (js *jwtService) GenerateRefreshToken(uuid, email string, role int32) (string, error) {
-	return "", nil
+func (js *jwtService) GenerateRefreshToken(user_id string, role int32) (RefreshToken, error) {
+	expirationTime := parseExpirationTime(js.cfg.Jwt.RefreshTokenExpiration, 7*24*time.Hour)
+
+	payload := RefreshToken{
+		UserId:    user_id,
+		SessionId: uuid.New().String(),
+		ExpiresAt: time.Now().Add(expirationTime),
+	}
+
+	claims := jwt.MapClaims{
+		"user_id": payload.UserId,
+		"role":    role,
+		"type":    "refresh",
+		"jti":     payload.SessionId,
+		"iat":     time.Now().Unix(),
+		"exp":     payload.ExpiresAt.Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	refreshToken, err := token.SignedString([]byte(js.cfg.Jwt.SecretKey))
+	if err != nil {
+		return RefreshToken{}, err
+	}
+	payload.Token = refreshToken
+
+	return payload, nil
 }
 
 func (js *jwtService) VerifyToken(tokenStr string) (*jwt.Token, jwt.MapClaims, error) {
