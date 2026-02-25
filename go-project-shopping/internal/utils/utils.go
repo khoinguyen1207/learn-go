@@ -50,3 +50,12 @@ func NewLoggerWithPath(path string, level string) *zerolog.Logger {
 
 	return logger.NewLoggerConfig(config)
 }
+
+func SanitizeBody(data map[string]any) {
+	sensitive := []string{"password", "token", "secret"}
+	for _, key := range sensitive {
+		if _, ok := data[key]; ok {
+			data[key] = "****"
+		}
+	}
+}

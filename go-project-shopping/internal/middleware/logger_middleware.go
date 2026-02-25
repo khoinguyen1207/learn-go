@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/url"
+	"project-shopping/internal/utils"
 	"project-shopping/pkg/logger"
 	"strings"
 	"time"
@@ -115,6 +116,7 @@ func LoggerMiddleware(l *zerolog.Logger) gin.HandlerFunc {
 
 		duration := time.Since(start)
 		traceId := logger.GetTraceId(c.Request.Context())
+		utils.SanitizeBody(request_body)
 
 		logEvent.Str("method", c.Request.Method).
 			Str("trace_id", traceId).
