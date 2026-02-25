@@ -16,6 +16,7 @@ const (
 	CodeConflict            ErrorResponseCode = "CONFLICT"
 	CodeInternalServerError ErrorResponseCode = "INTERNAL_SERVER_ERROR"
 	CodeValidationError     ErrorResponseCode = "VALIDATION_ERROR"
+	CodeTooManyRequests     ErrorResponseCode = "TOO_MANY_REQUESTS"
 )
 
 func (e *AppError) Error() string {

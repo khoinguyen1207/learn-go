@@ -17,15 +17,21 @@ type Client struct {
 	lastSeen time.Time
 }
 
-var clients = make(map[string]*Client)
+var (
+	mu      sync.Mutex
+	clients = make(map[string]*Client)
+)
 
 func getRateLimiter(ip string) *rate.Limiter {
+	mu.Lock()
+	defer mu.Unlock()
+
 	client, exists := clients[ip]
 	if !exists {
-		RATE_LIMIT_REQUEST_SECOND := utils.GetEnvAsInt("RATE_LIMIT_REQUEST_SECOND", 5)
-		RATE_LIMIT_REQUEST_BURST := utils.GetEnvAsInt("RATE_LIMIT_REQUEST_BURST", 10)
+		requestSecs := utils.GetEnvAsInt("RATE_LIMIT_REQUEST_SECOND", 5)
+		burst := utils.GetEnvAsInt("RATE_LIMIT_REQUEST_BURST", 10)
 		// 5 requests per second with a burst of 10
-		limiter := rate.NewLimiter(rate.Limit(RATE_LIMIT_REQUEST_SECOND), RATE_LIMIT_REQUEST_BURST)
+		limiter := rate.NewLimiter(rate.Limit(requestSecs), burst)
 		clients[ip] = &Client{limiter: limiter, lastSeen: time.Now()}
 		return limiter
 	}
@@ -36,23 +42,22 @@ func getRateLimiter(ip string) *rate.Limiter {
 
 func getClientIP(ctx *gin.Context) string {
 	ip := ctx.ClientIP()
-
 	if ip == "" {
 		ip = ctx.Request.RemoteAddr
 	}
-
 	return ip
 }
 
 func CleanupClients() {
 	for {
 		time.Sleep(time.Minute)
-
+		mu.Lock()
 		for ip, client := range clients {
 			if time.Since(client.lastSeen) > 3*time.Minute {
 				delete(clients, ip)
 			}
 		}
+		mu.Unlock()
 	}
 }
 

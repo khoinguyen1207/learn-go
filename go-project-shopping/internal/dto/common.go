@@ -70,6 +70,8 @@ func httpStatusFromErrorCode(code utils.ErrorResponseCode) int {
 		return http.StatusNotFound
 	case utils.CodeConflict:
 		return http.StatusConflict
+	case utils.CodeTooManyRequests:
+		return http.StatusTooManyRequests
 	default:
 		return http.StatusInternalServerError
 	}

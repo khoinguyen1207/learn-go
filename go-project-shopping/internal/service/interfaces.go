@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"project-shopping/internal/db/sqlc"
+
+	"github.com/gin-gonic/gin"
 )
 
 type UserService interface {
@@ -15,7 +17,7 @@ type UserService interface {
 }
 
 type AuthService interface {
-	Login(ctx context.Context, email, password string) (string, string, error)
+	Login(ctx *gin.Context, email, password string) (string, string, error)
 	Register(ctx context.Context, email, password string) error
 	Logout(ctx context.Context, refreshToken string) error
 	RefreshToken(ctx context.Context, token string) (string, string, error)
