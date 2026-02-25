@@ -16,9 +16,9 @@ type Route interface {
 }
 
 func RegisterRoutes(r *gin.Engine, routes ...Route) {
-	httpLogger := utils.NewLoggerWithPath("internal/logs/app.log", "info")
-	recoveryLogger := utils.NewLoggerWithPath("internal/logs/recovery.log", "error")
-	rateLimitLogger := utils.NewLoggerWithPath("internal/logs/rate_limit.log", "warn")
+	httpLogger := utils.NewLoggerWithPath("app.log", "info")
+	recoveryLogger := utils.NewLoggerWithPath("recovery.log", "error")
+	rateLimitLogger := utils.NewLoggerWithPath("rate_limit.log", "warn")
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},

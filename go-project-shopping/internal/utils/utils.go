@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"log"
 	"os"
+	"path/filepath"
 	"project-shopping/pkg/logger"
 	"strconv"
 	"strings"
@@ -37,10 +39,16 @@ func GetEnvAsInt(name string, defaultValue int) int {
 	return defaultValue
 }
 
-func NewLoggerWithPath(path string, level string) *zerolog.Logger {
+func NewLoggerWithPath(filename string, level string) *zerolog.Logger {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("❌ Error getting current working directory: %v", err)
+	}
+
+	filepath := filepath.Join(dir, "internal/logs", filename)
 	config := logger.LoggerConfig{
 		Level:      level,
-		Filename:   path,
+		Filename:   filepath,
 		MaxSize:    1, // megabytes
 		MaxBackups: 5,
 		MaxAge:     7, // days

@@ -25,7 +25,7 @@ func InitDB(cfg *config.Config) error {
 		return fmt.Errorf("Unable to parse database configuration: %v", err)
 	}
 
-	sqlLogger := utils.NewLoggerWithPath("internal/logs/sql.log", "info")
+	sqlLogger := utils.NewLoggerWithPath("sql.log", "info")
 
 	// Configure pgx tracer with zerolog
 	poolConfig.ConnConfig.Tracer = &tracelog.TraceLog{
