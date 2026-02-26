@@ -2,13 +2,13 @@ package middleware
 
 import (
 	"net/http"
-	"os"
+	"project-shopping/internal/config"
 
 	"github.com/gin-gonic/gin"
 )
 
 func ApiKeyMiddleware() gin.HandlerFunc {
-	apiKey := os.Getenv("X_API_KEY")
+	cfg := config.Get()
 
 	return func(ctx *gin.Context) {
 		if ctx.Request.Method == http.MethodOptions {
@@ -22,7 +22,7 @@ func ApiKeyMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if clientApiKey != apiKey {
+		if clientApiKey != cfg.XApiKey {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid API key"})
 			return
 		}

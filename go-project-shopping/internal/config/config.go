@@ -24,15 +24,24 @@ type JwtConfig struct {
 
 type Config struct {
 	Port          string
-	Db            DatabaseConfig
-	Redis         RedisConfig
-	Jwt           JwtConfig
 	EncryptionKey string
+	AppEnv        string
+	XApiKey       string
+
+	Db    DatabaseConfig
+	Redis RedisConfig
+	Jwt   JwtConfig
 }
 
-func NewConfig() *Config {
-	return &Config{
-		Port: fmt.Sprintf(":%s", utils.GetEnv("PORT", "8080")),
+var config Config
+
+func NewConfig() {
+	config = Config{
+		Port:          fmt.Sprintf(":%s", utils.GetEnv("PORT", "8080")),
+		AppEnv:        utils.GetEnv("APP_ENV", "development"),
+		EncryptionKey: utils.GetEnv("ENCRYPTION_KEY", "ffdffafae19249232834372926bfefe7"),
+		XApiKey:       utils.GetEnv("X_API_KEY", "21b8f79c-ba0e-485b-8a00-72b425a083a0"),
+
 		Db: DatabaseConfig{
 			DatabaseUrl: utils.GetEnv("DATABASE_URL", "postgres://user:password@localhost:5432/mydb?sslmode=disable"),
 		},
@@ -47,6 +56,9 @@ func NewConfig() *Config {
 			AccessTokenExpiration:  utils.GetEnv("ACCESS_TOKEN_EXPIRATION", "15m"),
 			RefreshTokenExpiration: utils.GetEnv("REFRESH_TOKEN_EXPIRATION", "168h"),
 		},
-		EncryptionKey: utils.GetEnv("ENCRYPTION_KEY", "ffdffafae19249232834372926bfefe7"),
 	}
+}
+
+func Get() *Config {
+	return &config
 }

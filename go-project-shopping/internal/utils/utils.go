@@ -56,7 +56,7 @@ func NewLoggerWithPath(filename string, level string) *zerolog.Logger {
 		IsDev:      GetEnv("APP_ENV", "production"),
 	}
 
-	return logger.NewLoggerConfig(config)
+	return logger.NewLogger(config)
 }
 
 func SanitizeBody(data map[string]any) {

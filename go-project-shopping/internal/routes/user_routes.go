@@ -22,10 +22,11 @@ func NewUserRoutes(handler *handler.UserHandler, jwtService auth.JWTService) *Us
 
 func (ur *UserRoutes) Register(r *gin.RouterGroup) {
 	route := r.Group("/users")
-	route.Use(middleware.AuthMiddleware(ur.jwtService))
+
 	{
 		route.GET("", ur.handler.GetUsers)
 		route.POST("", ur.handler.CreateUser)
+		route.Use(middleware.AuthMiddleware(ur.jwtService))
 		route.GET("/:uuid", ur.handler.GetUserByUUID)
 		route.PUT("/:id", ur.handler.UpdateUser)
 		route.DELETE("/:uuid", ur.handler.DeleteUser)

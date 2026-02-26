@@ -16,7 +16,7 @@ type Route interface {
 }
 
 func RegisterRoutes(r *gin.Engine, routes ...Route) {
-	httpLogger := utils.NewLoggerWithPath("app.log", "info")
+	httpLogger := utils.NewLoggerWithPath("http.log", "info")
 	recoveryLogger := utils.NewLoggerWithPath("recovery.log", "error")
 	rateLimitLogger := utils.NewLoggerWithPath("rate_limit.log", "warn")
 

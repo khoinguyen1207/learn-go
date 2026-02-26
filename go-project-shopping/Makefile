@@ -1,27 +1,26 @@
 include .env
 export
 
+# Configurations
 MIGRATION_DIR= internal/db/migrations
 
-# Import 
-importdb:
-	docker exec -i postgres-db psql -U postgres -d gin < ./db/backup.sql
+COMPOSE_FILE_PROD=docker-compose.prod.yaml
+COMPOSE_FILE_DEV=docker-compose.dev.yaml
+ENV_FILE=.env
+ENV_FILE_EXAMPLE=.env.example
 
-# Backup
-backupdb:
-	docker exec -i postgres-db pg_dump -U postgres -d gin > ./db/backup.sql
-
+# ===================== App commands =====================
 # Run Server
 run:
 	go run ./cmd/api
 
 # Build Server
 build:
-	go build -o bin/server ./cmd/api
+	go build -o bin/build ./cmd/api
 
 # Run built server
 run-built:
-	./bin/server
+	./bin/build
 
 # Sqlc generate
 sqlc:
@@ -55,4 +54,42 @@ migrate-drop:
 migrate-goto:
 	migrate -path $(MIGRATION_DIR) -database "$(DATABASE_URL)" goto $(VERSION)
 
-.PHONY: importdb backupdb server create-migrate migrate-up migrate-down migrate-down-n migrate-force migrate-drop migrate-goto sqlc
+
+# ===================== Docker commands =====================
+# Import 
+importdb:
+	docker exec -i postgres-db psql -U postgres -d gin < ./db/backup.sql
+
+# Backup
+backupdb:
+	docker exec -i postgres-db pg_dump -U postgres -d gin > ./db/backup.sql
+
+# ===================== Production commands ======================
+# Build and run production server
+prod:
+	docker compose -f $(COMPOSE_FILE_PROD) down
+	docker compose -f $(COMPOSE_FILE_PROD) --env-file $(ENV_FILE_EXAMPLE) up -d --build
+
+# Stop production server
+stop-prod:
+	docker compose -f $(COMPOSE_FILE_PROD) down
+
+# View logs (last 100 lines and follow)
+logs-prod:
+	docker compose -f $(COMPOSE_FILE_PROD) logs -f --tail=100
+
+# Access bash in running container
+bash:
+	docker exec -it go-app sh
+
+# ===================== Dev commands =====================
+# Build and run dev server
+dev:
+	docker compose -f $(COMPOSE_FILE_DEV) down
+	docker compose -f $(COMPOSE_FILE_DEV) --env-file $(ENV_FILE) up -d --build
+
+# Stop dev server
+stop-dev:
+	docker compose -f $(COMPOSE_FILE_DEV) down
+
+.PHONY: importdb backupdb server create-migrate migrate-up migrate-down migrate-down-n migrate-force migrate-drop migrate-goto sqlc run build run-built prod stop-prod logs-prod bash dev stop-dev

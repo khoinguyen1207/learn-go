@@ -1,3 +1,7 @@
 uploads/
 .env
+.env.production
 logs/
+tmp/
+.DS_Store
+bin/

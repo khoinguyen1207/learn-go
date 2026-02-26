@@ -16,14 +16,14 @@ func TraceMiddleware() gin.HandlerFunc {
 		}
 
 		// Set trace ID in request context
-		ctxValue := context.WithValue(ctx.Request.Context(), logger.TraceIdKey, traceId)
+		ctxValue := context.WithValue(ctx.Request.Context(), logger.TRACE_ID_KEY, traceId)
 		ctx.Request = ctx.Request.WithContext(ctxValue)
 
 		// Set trace ID in response header
 		ctx.Writer.Header().Set("X-Trace-ID", traceId)
 
 		// Set trace ID in gin context
-		ctx.Set(logger.TraceIdKey, traceId)
+		ctx.Set(logger.TRACE_ID_KEY, traceId)
 
 		ctx.Next()
 	}

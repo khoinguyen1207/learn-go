@@ -20,7 +20,7 @@ func (t *PgxZeroLogTracer) Log(ctx context.Context, level tracelog.LogLevel, msg
 	duration, _ := data["time"].(time.Duration)
 
 	baseLogger := t.Logger.With().
-		Str(logger.TraceIdKey, logger.GetTraceId(ctx)).
+		Str(logger.TRACE_ID_KEY, logger.GetTraceId(ctx)).
 		Str("sql", sql).
 		Interface("args", args).
 		Dur("duration", duration)
