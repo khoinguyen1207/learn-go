@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 	"project-shopping/pkg/logger"
@@ -42,7 +41,7 @@ func GetEnvAsInt(name string, defaultValue int) int {
 func NewLoggerWithPath(filename string, level string) *zerolog.Logger {
 	dir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("❌ Error getting current working directory: %v", err)
+		logger.Log.Fatal().Err(err).Msg("❌ Error getting directory in NewLoggerWithPath")
 	}
 
 	filepath := filepath.Join(dir, "internal/logs", filename)

@@ -3,10 +3,10 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
 	"project-shopping/internal/config"
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/utils"
+	"project-shopping/pkg/logger"
 	"project-shopping/pkg/pgx"
 	"time"
 
@@ -57,8 +57,7 @@ func InitDB(cfg *config.Config) error {
 
 	db = sqlc.New(dbpool)
 
-	log.Println("✅ Connected to the database successfully!")
-
+	logger.Log.Info().Msg("✅ Connected to the database successfully!")
 	return nil
 }
 

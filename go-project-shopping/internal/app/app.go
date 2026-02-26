@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,6 +12,7 @@ import (
 	"project-shopping/internal/validation"
 	"project-shopping/pkg/auth"
 	"project-shopping/pkg/cache"
+	"project-shopping/pkg/logger"
 	"syscall"
 	"time"
 
@@ -39,11 +39,11 @@ func NewApplication(cfg *config.Config) *Application {
 	r := gin.Default()
 
 	if err := validation.InitValidator(); err != nil {
-		log.Fatal("Failed to initialize validator:", err)
+		logger.Log.Fatal().Err(err).Msg("Failed to initialize validator")
 	}
 
 	if err := db.InitDB(cfg); err != nil {
-		log.Fatal("Failed to initialize database:", err)
+		logger.Log.Fatal().Err(err).Msg("Failed to connect to the database")
 	}
 
 	redisClient := config.InitRedis(cfg)
@@ -80,23 +80,23 @@ func (app *Application) Run() error {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
 	go func() {
-		log.Printf("✅ Server is running on port %s", app.config.Port)
+		logger.Log.Info().Msgf("Server is running on port %s", app.config.Port)
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatalf("ListenAndServe error: %v", err)
+			logger.Log.Fatal().Err(err).Msg("Failed to start server")
 		}
 	}()
 
 	<-quit
-	log.Println("⚠️  Shutting down server...")
+	logger.Log.Info().Msg("⚠️ Shutting down server gracefully...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("❌ Server forced to shutdown: %v", err)
+		logger.Log.Error().Err(err).Msg("❌ Server forced to shutdown")
 	}
 
-	log.Println("✅ Stopped server gracefully")
+	logger.Log.Info().Msg("✅ Stopped server gracefully")
 
 	return nil
 }

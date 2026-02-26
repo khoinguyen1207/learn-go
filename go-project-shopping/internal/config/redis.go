@@ -2,7 +2,7 @@ package config
 
 import (
 	"context"
-	"log"
+	"project-shopping/pkg/logger"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -26,10 +26,10 @@ func InitRedis(cfg *Config) *redis.Client {
 
 	_, err := client.Ping(ctx).Result()
 	if err != nil {
-		log.Fatalf("Failed to connect to Redis: %v", err)
+		logger.Log.Fatal().Err(err).Msg("❌ Failed to connect to Redis")
 	}
 
-	log.Println("✅ Connected to Redis successfully!")
+	logger.Log.Info().Msg("✅ Connected to Redis successfully!")
 
 	return client
 }
