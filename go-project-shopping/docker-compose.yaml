@@ -1,20 +1,25 @@
 version: "3.9"
 
 services:
-  # db:
-  #   image: postgres:18.1-alpine3.23
-  #   container_name: postgres_db
-  #   restart: unless-stopped
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: 123456
-  #     POSTGRES_DB: gin
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - dbdata:/var/lib/postgresql/data
-  #   networks:
-  #     - app-network
+  db:
+    image: postgres:18.1-alpine3.23
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: gin
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gin"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   redis:
     image: redis:8.0-alpine
@@ -27,15 +32,40 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis-data:/data
+      - redis_data:/data
       - ./system/redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./internal/logs:/app/internal/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
 
 volumes:
-  dbdata:
-  redis-data:
+  db_data:
+  redis_data:
 
 networks:
   app-network:
