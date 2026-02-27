@@ -22,6 +22,22 @@ type JwtConfig struct {
 	RefreshTokenExpiration string
 }
 
+type MailConfig struct {
+	FromAddress string
+}
+
+type AWSConfig struct {
+	Region          string
+	AccessKeyID     string
+	SecretAccessKey string
+}
+
+type MailtrapConfig struct {
+	NameSender string
+	APIKey     string
+	BaseURL    string
+}
+
 type Config struct {
 	Port          string
 	EncryptionKey string
@@ -31,6 +47,12 @@ type Config struct {
 	Db    DatabaseConfig
 	Redis RedisConfig
 	Jwt   JwtConfig
+
+	// Mail
+	MailProviderType string
+	Mail             MailConfig
+	AWS              AWSConfig
+	Mailtrap         MailtrapConfig
 }
 
 var config Config
@@ -55,6 +77,20 @@ func NewConfig() {
 			SecretKey:              utils.GetEnv("JWT_SECRET_KEY", "your_secret_key"),
 			AccessTokenExpiration:  utils.GetEnv("ACCESS_TOKEN_EXPIRATION", "15m"),
 			RefreshTokenExpiration: utils.GetEnv("REFRESH_TOKEN_EXPIRATION", "168h"),
+		},
+		MailProviderType: utils.GetEnv("MAIL_PROVIDER_TYPE", "ses"),
+		Mail: MailConfig{
+			FromAddress: utils.GetEnv("MAIL_FROM_ADDRESS", "noreply@example.com"),
+		},
+		AWS: AWSConfig{
+			Region:          utils.GetEnv("AWS_REGION", "us-east-1"),
+			AccessKeyID:     utils.GetEnv("AWS_ACCESS_KEY_ID", ""),
+			SecretAccessKey: utils.GetEnv("AWS_SECRET_ACCESS_KEY", ""),
+		},
+		Mailtrap: MailtrapConfig{
+			NameSender: utils.GetEnv("MAILTRAP_NAME_SENDER", "Support Team"),
+			APIKey:     utils.GetEnv("MAILTRAP_API_KEY", ""),
+			BaseURL:    utils.GetEnv("MAILTRAP_BASE_URL", "https://api.mailtrap.io"),
 		},
 	}
 }
