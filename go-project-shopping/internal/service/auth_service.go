@@ -185,3 +185,42 @@ func (as *authService) Logout(ctx context.Context, refreshToken string) error {
 
 	return nil
 }
+
+func (as *authService) ForgotPassword(ctx context.Context, email string) error {
+	rateLimitKey := fmt.Sprintf("reset:rate:%s", email)
+
+	if exists, err := as.cache.Exists(ctx, rateLimitKey); err != nil {
+		return utils.WrapError(err, "Failed to check rate limit", utils.CodeInternalServerError)
+	} else if exists {
+		return utils.NewError("Too many requests. Please try again later.", utils.CodeTooManyRequests)
+	}
+
+	user, err := as.repo.FindByEmail(ctx, email)
+	if err != nil {
+		return utils.NewError("User not found", utils.CodeNotFound)
+	}
+
+	token, err := utils.GenerateRandomString(16)
+	if err != nil {
+		return utils.WrapError(err, "Failed to generate reset token", utils.CodeInternalServerError)
+	}
+
+	cacheKey := fmt.Sprintf("reset:%s", token)
+	if err = as.cache.Set(ctx, cacheKey, user.Uuid.String(), 15*time.Minute); err != nil {
+		return utils.WrapError(err, "Failed to store reset token", utils.CodeInternalServerError)
+	}
+
+	if err = as.cache.Set(ctx, rateLimitKey, "1", 5*time.Minute); err != nil {
+		return utils.WrapError(err, "Failed to set rate limit", utils.CodeInternalServerError)
+	}
+
+	resetLink := fmt.Sprintf("https://yourdomain.com/reset-password?token=%s", token)
+	// Simulate sending email
+	fmt.Printf("Sending password reset link to %s: %s\n", email, resetLink)
+
+	return nil
+}
+
+func (as *authService) ResetPassword(ctx context.Context, token, newPassword string) error {
+	return nil
+}

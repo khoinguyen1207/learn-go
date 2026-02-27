@@ -79,3 +79,23 @@ func (ah *AuthHandler) RefreshToken(ctx *gin.Context) {
 
 	dto.SuccessResponse(ctx, "Refresh token successfully", response)
 }
+
+func (ah *AuthHandler) ForgotPassword(ctx *gin.Context) {
+	var params dto.ForgotPasswordRequest
+	if err := ctx.ShouldBindJSON(&params); err != nil {
+		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
+
+	err := ah.service.ForgotPassword(ctx.Request.Context(), params.Email)
+	if err != nil {
+		dto.ErrorResponse(ctx, err)
+		return
+	}
+
+	dto.SuccessResponse(ctx, "Reset link sent to your email", true)
+}
+
+func (ah *AuthHandler) ResetPassword(ctx *gin.Context) {
+
+}

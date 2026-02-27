@@ -21,4 +21,6 @@ type AuthService interface {
 	Register(ctx context.Context, email, password string) error
 	Logout(ctx context.Context, refreshToken string) error
 	RefreshToken(ctx context.Context, token string) (string, string, error)
+	ForgotPassword(ctx context.Context, email string) error
+	ResetPassword(ctx context.Context, token, newPassword string) error
 }

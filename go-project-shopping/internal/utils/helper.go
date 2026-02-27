@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"os"
 	"path/filepath"
 	"project-shopping/pkg/logger"
@@ -65,4 +67,12 @@ func SanitizeBody(data map[string]any) {
 			data[key] = "****"
 		}
 	}
+}
+
+func GenerateRandomString(byteLength int) (string, error) {
+	nonce := make([]byte, byteLength)
+	if _, err := rand.Read(nonce); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(nonce), nil
 }
