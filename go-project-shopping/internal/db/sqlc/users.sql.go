@@ -421,3 +421,19 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 	)
 	return i, err
 }
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE users
+SET password = $1
+WHERE uuid = $2 AND deleted_at IS NULL
+`
+
+type UpdateUserPasswordParams struct {
+	Password string    `json:"password"`
+	Uuid     uuid.UUID `json:"uuid"`
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.db.Exec(ctx, updateUserPassword, arg.Password, arg.Uuid)
+	return err
+}

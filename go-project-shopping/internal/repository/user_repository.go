@@ -180,3 +180,11 @@ func (ur *userRepository) FindByEmail(ctx context.Context, email string) (sqlc.U
 
 	return user, nil
 }
+
+func (ur *userRepository) UpdatePassword(ctx context.Context, arg sqlc.UpdateUserPasswordParams) error {
+	err := ur.db.UpdateUserPassword(ctx, arg)
+	if err != nil {
+		return err
+	}
+	return nil
+}

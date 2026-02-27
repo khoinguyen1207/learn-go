@@ -97,5 +97,17 @@ func (ah *AuthHandler) ForgotPassword(ctx *gin.Context) {
 }
 
 func (ah *AuthHandler) ResetPassword(ctx *gin.Context) {
+	var params dto.ResetPasswordRequest
+	if err := ctx.ShouldBindJSON(&params); err != nil {
+		dto.ValidationResponse(ctx, validation.HandleValidationError(err))
+		return
+	}
 
+	err := ah.service.ResetPassword(ctx.Request.Context(), params.Token, params.Password)
+	if err != nil {
+		dto.ErrorResponse(ctx, err)
+		return
+	}
+
+	dto.SuccessResponse(ctx, "Password reset successfully", true)
 }

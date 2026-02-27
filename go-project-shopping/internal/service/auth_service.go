@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/repository"
 	"project-shopping/internal/utils"
 	"project-shopping/pkg/auth"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/time/rate"
 )
@@ -222,5 +224,37 @@ func (as *authService) ForgotPassword(ctx context.Context, email string) error {
 }
 
 func (as *authService) ResetPassword(ctx context.Context, token, newPassword string) error {
+
+	cacheKey := fmt.Sprintf("reset:%s", token)
+	var uuidStr string
+	err := as.cache.Get(ctx, cacheKey, &uuidStr)
+	if err == redis.Nil || uuidStr == "" {
+		return utils.NewError("Invalid or expired token", utils.CodeBadRequest)
+	}
+	if err != nil {
+		return utils.WrapError(err, "Failed to get reset token", utils.CodeInternalServerError)
+	}
+
+	userUuid, err := uuid.Parse(uuidStr)
+	if err != nil {
+		return utils.WrapError(err, "Failed to parse user UUID", utils.CodeInternalServerError)
+	}
+
+	hashedPassword, err := utils.HashPassword(newPassword)
+	if err != nil {
+		return utils.WrapError(err, "Failed to hash password", utils.CodeInternalServerError)
+	}
+
+	arg := sqlc.UpdateUserPasswordParams{
+		Uuid:     userUuid,
+		Password: string(hashedPassword),
+	}
+	err = as.repo.UpdatePassword(ctx, arg)
+	if err != nil {
+		return utils.WrapError(err, "Failed to update password", utils.CodeInternalServerError)
+	}
+
+	as.cache.Delete(ctx, cacheKey)
+
 	return nil
 }

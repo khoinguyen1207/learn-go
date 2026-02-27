@@ -92,3 +92,8 @@ WHERE uuid = $1;
 SELECT * FROM users
 WHERE deleted_at IS NULL
 AND email = $1;
+
+-- name: UpdateUserPassword :exec
+UPDATE users
+SET password = sqlc.arg(password)
+WHERE uuid = sqlc.arg(uuid) AND deleted_at IS NULL;
