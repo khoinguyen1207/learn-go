@@ -46,12 +46,12 @@ func (p *SESProvider) Name() string {
 	return "ses"
 }
 
-func (p *SESProvider) SendMail(ctx context.Context, msg *MailMessage) (*SendResult, error) {
+func (p *SESProvider) SendMail(ctx context.Context, msg *MailMessage) (SendResult, error) {
 	msg.From = Address{
 		Name:  "Support Team",
 		Email: p.cfg.From,
 	}
-	return &SendResult{
+	return SendResult{
 		MessageID: "ses-message-id-placeholder",
 		Provider:  p.Name(),
 	}, nil

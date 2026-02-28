@@ -5,15 +5,16 @@ import (
 	"project-shopping/internal/repository"
 	"project-shopping/internal/routes"
 	"project-shopping/internal/service"
+	"project-shopping/pkg/mail"
 )
 
 type AuthModule struct {
 	routes routes.Route
 }
 
-func NewAuthModule(mctx *ModuleContext) *AuthModule {
+func NewAuthModule(mctx *ModuleContext, mailService mail.MailService) *AuthModule {
 	userRepository := repository.NewUserRepository(mctx.db)
-	authService := service.NewAuthService(userRepository, mctx.jwt, mctx.cache)
+	authService := service.NewAuthService(userRepository, mctx.jwt, mctx.cache, mailService)
 	authHandler := handler.NewAuthHandler(authService)
 	authRoutes := routes.NewAuthRoutes(authHandler, mctx.jwt)
 

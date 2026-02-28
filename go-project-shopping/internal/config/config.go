@@ -22,10 +22,6 @@ type JwtConfig struct {
 	RefreshTokenExpiration string
 }
 
-type MailConfig struct {
-	FromAddress string
-}
-
 type AWSConfig struct {
 	Region          string
 	AccessKeyID     string
@@ -50,9 +46,11 @@ type Config struct {
 
 	// Mail
 	MailProviderType string
-	Mail             MailConfig
-	AWS              AWSConfig
-	Mailtrap         MailtrapConfig
+	Mail             struct {
+		FromAddress string
+	}
+	AWS      AWSConfig
+	Mailtrap MailtrapConfig
 }
 
 var config Config
@@ -79,7 +77,9 @@ func NewConfig() {
 			RefreshTokenExpiration: utils.GetEnv("REFRESH_TOKEN_EXPIRATION", "168h"),
 		},
 		MailProviderType: utils.GetEnv("MAIL_PROVIDER_TYPE", "ses"),
-		Mail: MailConfig{
+		Mail: struct {
+			FromAddress string
+		}{
 			FromAddress: utils.GetEnv("MAIL_FROM_ADDRESS", "noreply@example.com"),
 		},
 		AWS: AWSConfig{

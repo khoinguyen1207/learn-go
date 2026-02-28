@@ -9,6 +9,7 @@ import (
 	"project-shopping/internal/utils"
 	"project-shopping/pkg/auth"
 	"project-shopping/pkg/cache"
+	"project-shopping/pkg/mail"
 	"sync"
 	"time"
 
@@ -20,9 +21,10 @@ import (
 )
 
 type authService struct {
-	repo   repository.UserRepository
-	jwtSrv auth.JWTService
-	cache  cache.CacheService
+	repo        repository.UserRepository
+	jwtSrv      auth.JWTService
+	cache       cache.CacheService
+	mailService mail.MailService
 }
 
 type LoginAttempt struct {
@@ -37,11 +39,12 @@ var (
 	MaxLoginAttempts = 5
 )
 
-func NewAuthService(repo repository.UserRepository, jwtSrv auth.JWTService, cache cache.CacheService) AuthService {
+func NewAuthService(repo repository.UserRepository, jwtSrv auth.JWTService, cache cache.CacheService, mailService mail.MailService) AuthService {
 	return &authService{
-		repo:   repo,
-		jwtSrv: jwtSrv,
-		cache:  cache,
+		repo:        repo,
+		jwtSrv:      jwtSrv,
+		cache:       cache,
+		mailService: mailService,
 	}
 }
 
@@ -220,11 +223,21 @@ func (as *authService) ForgotPassword(ctx context.Context, email string) error {
 	// Simulate sending email
 	fmt.Printf("Sending password reset link to %s: %s\n", email, resetLink)
 
+	mailMsg := &mail.MailMessage{
+		To: []mail.Address{
+			{Email: email},
+		},
+		Subject: "Password Reset Request",
+		Text:    fmt.Sprintf("Click the link to reset your password: %s", resetLink),
+	}
+	if err = as.mailService.SendMail(ctx, mailMsg); err != nil {
+		return utils.NewError("Failed to send reset email", utils.CodeBadRequest)
+	}
+
 	return nil
 }
 
 func (as *authService) ResetPassword(ctx context.Context, token, newPassword string) error {
-
 	cacheKey := fmt.Sprintf("reset:%s", token)
 	var uuidStr string
 	err := as.cache.Get(ctx, cacheKey, &uuidStr)

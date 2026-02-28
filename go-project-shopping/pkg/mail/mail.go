@@ -10,12 +10,11 @@ import (
 )
 
 type MailMessage struct {
-	From     Address
-	To       []Address
-	Cc       []Address
-	Subject  string
-	BodyText string
-	BodyHTML string
+	From    Address
+	To      []Address
+	Cc      []Address
+	Subject string
+	Text    string
 }
 
 type Address struct {

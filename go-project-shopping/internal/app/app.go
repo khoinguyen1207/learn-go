@@ -9,10 +9,12 @@ import (
 	"project-shopping/internal/db"
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/routes"
+	"project-shopping/internal/utils"
 	"project-shopping/internal/validation"
 	"project-shopping/pkg/auth"
 	"project-shopping/pkg/cache"
 	"project-shopping/pkg/logger"
+	"project-shopping/pkg/mail"
 	"syscall"
 	"time"
 
@@ -49,6 +51,12 @@ func NewApplication(cfg *config.Config) *Application {
 	redisClient := config.InitRedis(cfg)
 	cacheService := cache.NewCacheService(redisClient)
 	jwtService := auth.NewJWTService(cfg)
+	mailProvider, err := mail.NewMailProvider(cfg)
+	if err != nil {
+		logger.Log.Fatal().Err(err).Msg("Failed to initialize mail provider")
+	}
+	mailLogger := utils.NewLoggerWithPath("mail.log", "info")
+	mailService := mail.NewMailService(cfg, mailProvider, mailLogger)
 
 	moduleContext := &ModuleContext{
 		db:    db.GetDB(),
@@ -58,7 +66,7 @@ func NewApplication(cfg *config.Config) *Application {
 
 	modules := []Module{
 		NewUserModule(moduleContext),
-		NewAuthModule(moduleContext),
+		NewAuthModule(moduleContext, mailService),
 	}
 
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)
