@@ -41,10 +41,7 @@ func GetEnvAsInt(name string, defaultValue int) int {
 }
 
 func NewLoggerWithPath(filename string, level string) *zerolog.Logger {
-	dir, err := os.Getwd()
-	if err != nil {
-		logger.Log.Fatal().Err(err).Msg("❌ Error getting directory in NewLoggerWithPath")
-	}
+	dir := GetRootDir()
 
 	filepath := filepath.Join(dir, "internal/logs", filename)
 	config := logger.LoggerConfig{
@@ -58,6 +55,14 @@ func NewLoggerWithPath(filename string, level string) *zerolog.Logger {
 	}
 
 	return logger.NewLogger(config)
+}
+
+func GetRootDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		logger.Log.Fatal().Err(err).Msg("❌ Error getting root directory")
+	}
+	return dir
 }
 
 func SanitizeBody(data map[string]any) {

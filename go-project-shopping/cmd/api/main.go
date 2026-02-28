@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"os"
 	"path/filepath"
 	"project-shopping/internal/app"
 	"project-shopping/internal/config"
+	"project-shopping/internal/utils"
 	"project-shopping/pkg/logger"
 
 	"github.com/joho/godotenv"
@@ -31,10 +31,7 @@ func main() {
 }
 
 func loadEnv() {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("❌ Error getting current working directory: %v", err)
-	}
+	dir := utils.GetRootDir()
 	filepath := filepath.Join(dir, ".env")
 
 	if err := godotenv.Load(filepath); err != nil {

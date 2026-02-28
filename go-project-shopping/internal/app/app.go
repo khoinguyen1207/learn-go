@@ -2,9 +2,11 @@ package app
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"project-shopping/internal/config"
 	"project-shopping/internal/db"
 	"project-shopping/internal/db/sqlc"
@@ -15,6 +17,7 @@ import (
 	"project-shopping/pkg/cache"
 	"project-shopping/pkg/logger"
 	"project-shopping/pkg/mail"
+	"project-shopping/pkg/template"
 	"syscall"
 	"time"
 
@@ -51,12 +54,19 @@ func NewApplication(cfg *config.Config) *Application {
 	redisClient := config.InitRedis(cfg)
 	cacheService := cache.NewCacheService(redisClient)
 	jwtService := auth.NewJWTService(cfg)
+
+	// Initialize template service
+	dir := utils.GetRootDir()
+	templateDir := filepath.Join(dir, "pkg", "template")
+	templateService := template.NewTemplateService(templateDir)
+
+	// Initialize mail service
 	mailProvider, err := mail.NewMailProvider(cfg)
 	if err != nil {
 		logger.Log.Fatal().Err(err).Msg("Failed to initialize mail provider")
 	}
 	mailLogger := utils.NewLoggerWithPath("mail.log", "info")
-	mailService := mail.NewMailService(cfg, mailProvider, mailLogger)
+	mailService := mail.NewMailService(cfg, mailProvider, mailLogger, templateService)
 
 	moduleContext := &ModuleContext{
 		db:    db.GetDB(),
@@ -88,7 +98,7 @@ func (app *Application) Run() error {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
 	go func() {
-		logger.Log.Info().Msgf("Server is running on port %s", app.config.Port)
+		log.Println("✅ Server is running on port", app.config.Port)
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 			logger.Log.Fatal().Err(err).Msg("Failed to start server")
 		}

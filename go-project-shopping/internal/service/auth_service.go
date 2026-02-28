@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"project-shopping/internal/config"
 	"project-shopping/internal/db/sqlc"
 	"project-shopping/internal/repository"
 	"project-shopping/internal/utils"
 	"project-shopping/pkg/auth"
 	"project-shopping/pkg/cache"
 	"project-shopping/pkg/mail"
+	"project-shopping/pkg/template"
 	"sync"
 	"time"
 
@@ -211,7 +213,7 @@ func (as *authService) ForgotPassword(ctx context.Context, email string) error {
 	}
 
 	cacheKey := fmt.Sprintf("reset:%s", token)
-	if err = as.cache.Set(ctx, cacheKey, user.Uuid.String(), 15*time.Minute); err != nil {
+	if err = as.cache.Set(ctx, cacheKey, user.Uuid.String(), config.RESET_PASSWORD_TOKEN_EXPIRATION); err != nil {
 		return utils.WrapError(err, "Failed to store reset token", utils.CodeInternalServerError)
 	}
 
@@ -220,17 +222,20 @@ func (as *authService) ForgotPassword(ctx context.Context, email string) error {
 	}
 
 	resetLink := fmt.Sprintf("https://yourdomain.com/reset-password?token=%s", token)
-	// Simulate sending email
-	fmt.Printf("Sending password reset link to %s: %s\n", email, resetLink)
 
-	mailMsg := &mail.MailMessage{
-		To: []mail.Address{
+	err = as.mailService.SendWithTemplate(
+		ctx,
+		[]mail.Address{
 			{Email: email},
 		},
-		Subject: "Password Reset Request",
-		Text:    fmt.Sprintf("Click the link to reset your password: %s", resetLink),
-	}
-	if err = as.mailService.SendMail(ctx, mailMsg); err != nil {
+		"Password Reset Request",
+		"forgot_password.html",
+		template.ForgotPasswordTemplateData{
+			Username:  user.Fullname,
+			ResetLink: resetLink,
+		},
+	)
+	if err != nil {
 		return utils.NewError("Failed to send reset email", utils.CodeBadRequest)
 	}
 

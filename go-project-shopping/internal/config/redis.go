@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"log"
 	"project-shopping/pkg/logger"
 	"time"
 
@@ -29,7 +30,7 @@ func InitRedis(cfg *Config) *redis.Client {
 		logger.Log.Fatal().Err(err).Msg("❌ Failed to connect to Redis")
 	}
 
-	logger.Log.Info().Msg("✅ Connected to Redis successfully!")
+	log.Println("✅ Connected to Redis successfully!")
 
 	return client
 }

@@ -3,10 +3,11 @@ package mail
 import "context"
 
 type MailProvider interface {
-	SendMail(ctx context.Context, msg *MailMessage) (SendResult, error)
+	SendMail(ctx context.Context, msg *MailMessage) (*SendResult, error)
 	Name() string
 }
 
 type MailService interface {
 	SendMail(ctx context.Context, msg *MailMessage) error
+	SendWithTemplate(ctx context.Context, to []Address, subject string, templateName string, data any) error
 }
