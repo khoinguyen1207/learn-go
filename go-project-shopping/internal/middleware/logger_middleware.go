@@ -116,7 +116,7 @@ func LoggerMiddleware(l *zerolog.Logger) gin.HandlerFunc {
 
 		duration := time.Since(start)
 		traceId := logger.GetTraceId(c.Request.Context())
-		utils.SanitizeBody(request_body)
+		safeRequestBody := utils.SanitizeBody(request_body)
 
 		logEvent.Str("method", c.Request.Method).
 			Str("trace_id", traceId).
@@ -126,7 +126,7 @@ func LoggerMiddleware(l *zerolog.Logger) gin.HandlerFunc {
 			Str("request_uri", c.Request.RequestURI).
 			Str("content-type", c.GetHeader("Content-Type")).
 			Interface("headers", c.Request.Header).
-			Interface("request_body", request_body).
+			Interface("request_body", safeRequestBody).
 			Interface("response_body", responseBodyParsed).
 			Int("status", c.Writer.Status()).
 			Int64("duration_ms", duration.Milliseconds()).

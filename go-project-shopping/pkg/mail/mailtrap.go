@@ -17,15 +17,14 @@ type MailtrapProviderConfig struct {
 	BaseURL    string
 	Timeout    time.Duration
 }
+type MailtrapResponse struct {
+	Success    bool     `json:"success"`
+	MessageIDs []string `json:"message_ids"`
+}
 
 type MailtrapProvider struct {
 	client *http.Client
 	cfg    *MailtrapProviderConfig
-}
-
-type MailtrapResponse struct {
-	Success    bool     `json:"success"`
-	MessageIDs []string `json:"message_ids"`
 }
 
 func NewMailtrapProvider(cfg *MailtrapProviderConfig) (*MailtrapProvider, error) {

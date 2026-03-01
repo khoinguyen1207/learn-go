@@ -13,6 +13,26 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var sensitiveFields = map[string]bool{
+	"password":              true,
+	"password_confirmation": true,
+	"confirm_password":      true,
+	"old_password":          true,
+	"new_password":          true,
+	"secret":                true,
+	"secret_key":            true,
+	"api_key":               true,
+	"access_token":          true,
+	"refresh_token":         true,
+	"token":                 true,
+	"authorization":         true,
+	"credit_card":           true,
+	"card_number":           true,
+	"cvv":                   true,
+	"ssn":                   true,
+	"private_key":           true,
+}
+
 func NormalizeString(s string) string {
 	return strings.ToLower(strings.TrimSpace(s))
 }
@@ -65,13 +85,45 @@ func GetRootDir() string {
 	return dir
 }
 
-func SanitizeBody(data map[string]any) {
-	sensitive := []string{"password", "token", "secret"}
-	for _, key := range sensitive {
-		if _, ok := data[key]; ok {
-			data[key] = "****"
+func SanitizeBody(data map[string]any) map[string]any {
+	sanitized := make(map[string]any, len(data))
+
+	for key, value := range data {
+		lowerKey := strings.ToLower(key)
+
+		if sensitiveFields[lowerKey] {
+			sanitized[key] = "***REDACTED***"
+			continue
+		}
+
+		switch v := value.(type) {
+		case map[string]any:
+			// Nested map, sanitize recursively
+			sanitized[key] = SanitizeBody(v)
+		case []any:
+			// Handle slice
+			sanitized[key] = sanitizeSlice(v)
+		default:
+			sanitized[key] = value
 		}
 	}
+
+	return sanitized
+}
+
+func sanitizeSlice(slice []any) []any {
+	result := make([]any, len(slice))
+	for i, item := range slice {
+		switch v := item.(type) {
+		case map[string]any:
+			result[i] = SanitizeBody(v)
+		case []any:
+			result[i] = sanitizeSlice(v)
+		default:
+			result[i] = item
+		}
+	}
+	return result
 }
 
 func GenerateRandomString(byteLength int) (string, error) {
