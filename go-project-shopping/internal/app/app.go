@@ -56,8 +56,8 @@ func NewApplication(cfg *config.Config) *Application {
 	jwtService := auth.NewJWTService(cfg)
 
 	// Initialize template service
-	dir := utils.GetRootDir()
-	templateDir := filepath.Join(dir, "pkg", "template")
+	rootDir := utils.GetRootDir()
+	templateDir := filepath.Join(rootDir, "pkg", "template")
 	templateService := template.NewTemplateService(templateDir)
 
 	// Initialize mail service

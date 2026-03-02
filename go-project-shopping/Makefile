@@ -11,8 +11,12 @@ ENV_FILE_EXAMPLE=.env.example
 
 # ===================== App commands =====================
 # Run Server
-run:
+run-server:
 	go run ./cmd/api
+
+# Run worker
+run-worker:
+	go run ./cmd/worker
 
 # Build Server
 build:

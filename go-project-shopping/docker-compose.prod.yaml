@@ -43,6 +43,21 @@ services:
       timeout: 10s
       retries: 3
 
+  rabbitmq:
+    image: rabbitmq:4.2.4-management-alpine
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   app:
     build:
       context: .
@@ -52,13 +67,35 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - .env.example
+      - .env
     volumes:
       - ./internal/logs:/app/internal/logs
     depends_on:
       db:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: go-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./internal/logs:/app/internal/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     networks:
       - app-network
