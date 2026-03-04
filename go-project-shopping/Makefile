@@ -96,4 +96,4 @@ dev:
 stop-dev:
 	docker compose -f $(COMPOSE_FILE_DEV) down
 
-.PHONY: importdb backupdb server create-migrate migrate-up migrate-down migrate-down-n migrate-force migrate-drop migrate-goto sqlc run build run-built prod stop-prod logs-prod bash dev stop-dev
+.PHONY: importdb backupdb server create-migrate migrate-up migrate-down migrate-down-n migrate-force migrate-drop migrate-goto sqlc run build run-built prod stop-prod logs-prod bash dev stop-dev run-worker

@@ -17,6 +17,15 @@ type MailtrapProviderConfig struct {
 	BaseURL    string
 	Timeout    time.Duration
 }
+
+type MailTrapContent struct {
+	From    Address   `json:"from"`
+	To      []Address `json:"to"`
+	Cc      []Address `json:"cc,omitempty"`
+	Subject string    `json:"subject"`
+	Text    string    `json:"text,omitempty"`
+	HTML    string    `json:"html,omitempty"`
+}
 type MailtrapResponse struct {
 	Success    bool     `json:"success"`
 	MessageIDs []string `json:"message_ids"`
@@ -39,25 +48,19 @@ func (p *MailtrapProvider) Name() string {
 }
 
 func (p *MailtrapProvider) SendMail(ctx context.Context, msg *MailMessage) (*SendResult, error) {
-	from := Address{
-		Email: p.cfg.MailSender,
-		Name:  p.cfg.NameSender,
-	}
-	content := struct {
-		From    Address   `json:"from"`
-		To      []Address `json:"to"`
-		Cc      []Address `json:"cc,omitempty"`
-		Subject string    `json:"subject"`
-		Text    string    `json:"text,omitempty"`
-		HTML    string    `json:"html,omitempty"`
-	}{
-		From:    from,
+	content := MailTrapContent{
+		From: Address{
+			Email: p.cfg.MailSender,
+			Name:  p.cfg.NameSender,
+		},
 		To:      msg.To,
 		Cc:      msg.Cc,
 		Subject: msg.Subject,
 		Text:    msg.BodyText,
 		HTML:    msg.BodyHTML,
 	}
+
+	time.Sleep(5 * time.Second)
 
 	payload, err := json.Marshal(content)
 	if err != nil {

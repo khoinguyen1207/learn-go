@@ -17,6 +17,7 @@ import (
 	"project-shopping/pkg/cache"
 	"project-shopping/pkg/logger"
 	"project-shopping/pkg/mail"
+	"project-shopping/pkg/rabbitmq"
 	"project-shopping/pkg/template"
 	"syscall"
 	"time"
@@ -68,6 +69,13 @@ func NewApplication(cfg *config.Config) *Application {
 	mailLogger := utils.NewLoggerWithPath("mail.log", "info")
 	mailService := mail.NewMailService(cfg, mailProvider, mailLogger, templateService)
 
+	// Initialize RabbitMQ service
+	workerLogger := utils.NewLoggerWithPath("worker.log", "info")
+	rabbitMQService, err := rabbitmq.NewRabbitMQService(cfg.RabbitMQURL, workerLogger)
+	if err != nil {
+		logger.Log.Fatal().Err(err).Msg("Failed to initialize RabbitMQ service")
+	}
+
 	moduleContext := &ModuleContext{
 		db:    db.GetDB(),
 		cache: cacheService,
@@ -76,7 +84,7 @@ func NewApplication(cfg *config.Config) *Application {
 
 	modules := []Module{
 		NewUserModule(moduleContext),
-		NewAuthModule(moduleContext, mailService),
+		NewAuthModule(moduleContext, mailService, rabbitMQService),
 	}
 
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)
@@ -105,7 +113,7 @@ func (app *Application) Run() error {
 	}()
 
 	<-quit
-	logger.Log.Info().Msg("⚠️ Shutting down server gracefully...")
+	logger.Log.Info().Msg("⚠️ Shutdown signal received, stopping app server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
@@ -114,7 +122,7 @@ func (app *Application) Run() error {
 		logger.Log.Error().Err(err).Msg("❌ Server forced to shutdown")
 	}
 
-	logger.Log.Info().Msg("✅ Stopped server gracefully")
+	logger.Log.Info().Msg("✅ Server stopped gracefully")
 
 	return nil
 }

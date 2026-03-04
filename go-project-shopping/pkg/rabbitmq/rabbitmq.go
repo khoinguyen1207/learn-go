@@ -16,32 +16,34 @@ type rabbitMQService struct {
 	logger  *zerolog.Logger
 }
 
-func NewRabbitMQService(url string, logger *zerolog.Logger) RabbitMQService {
+func NewRabbitMQService(url string, logger *zerolog.Logger) (RabbitMQService, error) {
 	conn, err := amqp091.Dial(url)
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		return nil, err
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
 		log.Fatalf("Failed to open a channel: %v", err)
+		return nil, err
 	}
 
 	return &rabbitMQService{
 		conn:    conn,
 		channel: ch,
 		logger:  logger,
-	}
+	}, nil
 }
 
-func (r *rabbitMQService) Publish(ctx context.Context, queue string, message any) error {
+func (r *rabbitMQService) Publish(ctx context.Context, queue QueueName, message any) error {
 	_, err := r.channel.QueueDeclare(
-		queue, // queue name
-		true,  // durable -> If true, the queue will survive a broker restart
-		false, // delete when unused -> If true, the queue will be deleted when there are no more consumers
-		false, // exclusive -> If true, the queue can only be used by the current connection and will be deleted when the connection closes
-		false, // no-wait
-		nil,   // arguments
+		string(queue), // queue name
+		true,          // durable -> If true, the queue will survive a broker restart
+		false,         // delete when unused -> If true, the queue will be deleted when there are no more consumers
+		false,         // exclusive -> If true, the queue can only be used by the current connection and will be deleted when the connection closes
+		false,         // no-wait
+		nil,           // arguments
 	)
 	if err != nil {
 		return fmt.Errorf("Failed to declare queue: %w", err)
@@ -53,10 +55,10 @@ func (r *rabbitMQService) Publish(ctx context.Context, queue string, message any
 	}
 
 	err = r.channel.PublishWithContext(ctx,
-		"",    // exchange
-		queue, // routing key
-		false, // mandatory
-		false, // immediate
+		"",            // exchange
+		string(queue), // routing key
+		false,         // mandatory
+		false,         // immediate
 		amqp091.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(body),
@@ -68,27 +70,27 @@ func (r *rabbitMQService) Publish(ctx context.Context, queue string, message any
 	return nil
 }
 
-func (r *rabbitMQService) Consume(ctx context.Context, queue string, handler func([]byte) error) error {
+func (r *rabbitMQService) Consume(ctx context.Context, queue QueueName, handler func([]byte) error) error {
 	_, err := r.channel.QueueDeclare(
-		queue, // queue name
-		true,  // durable
-		false, // delete when unused
-		false, // exclusive
-		false, // no-wait
-		nil,   // arguments
+		string(queue), // queue name
+		true,          // durable
+		false,         // delete when unused
+		false,         // exclusive
+		false,         // no-wait
+		nil,           // arguments
 	)
 	if err != nil {
 		return fmt.Errorf("Failed to declare queue: %w", err)
 	}
 
 	msgs, err := r.channel.Consume(
-		queue, // queue
-		"",    // consumer
-		false, // auto-ack -> If true, the server will consider messages acknowledged once delivered. If false, the server expects explicit acknowledgments from the consumer.
-		false, // exclusive
-		false, // no-local
-		false, // no-wait
-		nil,   // args
+		string(queue), // queue
+		"",            // consumer
+		false,         // auto-ack -> If true, the server will consider messages acknowledged once delivered. If false, the server expects explicit acknowledgments from the consumer.
+		false,         // exclusive
+		false,         // no-local
+		false,         // no-wait
+		nil,           // args
 	)
 	if err != nil {
 		return fmt.Errorf("Failed to register a consumer: %w", err)

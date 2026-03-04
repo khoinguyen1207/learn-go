@@ -46,11 +46,13 @@ type Config struct {
 
 	// Mail
 	MailProviderType string
-	Mail             struct {
-		FromAddress string
-	}
+	MailFromAddress  string
+
 	AWS      AWSConfig
 	Mailtrap MailtrapConfig
+
+	// RabbitMQ
+	RabbitMQURL string
 }
 
 var config Config
@@ -77,11 +79,7 @@ func NewConfig() {
 			RefreshTokenExpiration: utils.GetEnv("REFRESH_TOKEN_EXPIRATION", "168h"),
 		},
 		MailProviderType: utils.GetEnv("MAIL_PROVIDER_TYPE", "ses"),
-		Mail: struct {
-			FromAddress string
-		}{
-			FromAddress: utils.GetEnv("MAIL_FROM_ADDRESS", "noreply@example.com"),
-		},
+		MailFromAddress:  utils.GetEnv("MAIL_FROM_ADDRESS", "noreply@example.com"),
 		AWS: AWSConfig{
 			Region:          utils.GetEnv("AWS_REGION", "us-east-1"),
 			AccessKeyID:     utils.GetEnv("AWS_ACCESS_KEY_ID", ""),
@@ -92,6 +90,7 @@ func NewConfig() {
 			APIKey:     utils.GetEnv("MAILTRAP_API_KEY", ""),
 			BaseURL:    utils.GetEnv("MAILTRAP_BASE_URL", "https://api.mailtrap.io"),
 		},
+		RabbitMQURL: utils.GetEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
 	}
 }
 

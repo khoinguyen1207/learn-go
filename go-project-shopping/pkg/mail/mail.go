@@ -12,12 +12,19 @@ import (
 )
 
 type MailMessage struct {
-	From     Address
 	To       []Address
 	Cc       []Address
 	Subject  string
 	BodyText string
 	BodyHTML string
+}
+
+type MailMessageTemplate struct {
+	To           []Address
+	Cc           []Address
+	Subject      string
+	TemplateName string
+	Data         any
 }
 
 type Address struct {
@@ -45,7 +52,7 @@ type mailService struct {
 
 func NewMailService(config *config.Config, provider MailProvider, logger *zerolog.Logger, tmpl template.TemplateService) MailService {
 	mailConfig := MailConfig{
-		FromAddress: config.Mail.FromAddress,
+		FromAddress: config.MailFromAddress,
 		MaxRetries:  3,
 	}
 
@@ -59,19 +66,17 @@ func NewMailService(config *config.Config, provider MailProvider, logger *zerolo
 
 func (ms *mailService) SendWithTemplate(
 	ctx context.Context,
-	to []Address,
-	subject string,
-	templateName string,
-	data any,
+	msg *MailMessageTemplate,
 ) error {
-	html, err := ms.template.Render(templateName, data)
+	html, err := ms.template.Render(msg.TemplateName, msg.Data)
 	if err != nil {
 		return fmt.Errorf("mail: render template failed: %w", err)
 	}
 
 	return ms.SendMail(ctx, &MailMessage{
-		To:       to,
-		Subject:  subject,
+		To:       msg.To,
+		Cc:       msg.Cc,
+		Subject:  msg.Subject,
 		BodyHTML: html,
 	})
 }

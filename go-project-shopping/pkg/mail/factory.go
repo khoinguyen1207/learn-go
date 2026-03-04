@@ -17,14 +17,14 @@ func NewMailProvider(cfg *config.Config) (MailProvider, error) {
 	switch ProviderType(cfg.MailProviderType) {
 	case ProviderSES:
 		return NewSESProvider(&SESProviderConfig{
-			From:            cfg.Mail.FromAddress,
+			From:            cfg.MailFromAddress,
 			Region:          cfg.AWS.Region,
 			AccessKeyID:     cfg.AWS.AccessKeyID,
 			SecretAccessKey: cfg.AWS.SecretAccessKey,
 		})
 	case ProviderMailtrap:
 		return NewMailtrapProvider(&MailtrapProviderConfig{
-			MailSender: cfg.Mail.FromAddress,
+			MailSender: cfg.MailFromAddress,
 			NameSender: cfg.Mailtrap.NameSender,
 			APIKey:     cfg.Mailtrap.APIKey,
 			BaseURL:    cfg.Mailtrap.BaseURL,

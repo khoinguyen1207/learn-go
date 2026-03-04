@@ -9,5 +9,5 @@ type MailProvider interface {
 
 type MailService interface {
 	SendMail(ctx context.Context, msg *MailMessage) error
-	SendWithTemplate(ctx context.Context, to []Address, subject string, templateName string, data any) error
+	SendWithTemplate(ctx context.Context, msg *MailMessageTemplate) error
 }

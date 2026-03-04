@@ -11,6 +11,7 @@ import (
 	"project-shopping/pkg/auth"
 	"project-shopping/pkg/cache"
 	"project-shopping/pkg/mail"
+	"project-shopping/pkg/rabbitmq"
 	"project-shopping/pkg/template"
 	"sync"
 	"time"
@@ -23,10 +24,11 @@ import (
 )
 
 type authService struct {
-	repo        repository.UserRepository
-	jwtSrv      auth.JWTService
-	cache       cache.CacheService
-	mailService mail.MailService
+	repo            repository.UserRepository
+	jwtSrv          auth.JWTService
+	cache           cache.CacheService
+	mailService     mail.MailService
+	rabbitMQService rabbitmq.RabbitMQService
 }
 
 type LoginAttempt struct {
@@ -41,12 +43,19 @@ var (
 	MaxLoginAttempts = 5
 )
 
-func NewAuthService(repo repository.UserRepository, jwtSrv auth.JWTService, cache cache.CacheService, mailService mail.MailService) AuthService {
+func NewAuthService(
+	repo repository.UserRepository,
+	jwtSrv auth.JWTService,
+	cache cache.CacheService,
+	mailService mail.MailService,
+	rabbitMQService rabbitmq.RabbitMQService,
+) AuthService {
 	return &authService{
-		repo:        repo,
-		jwtSrv:      jwtSrv,
-		cache:       cache,
-		mailService: mailService,
+		repo:            repo,
+		jwtSrv:          jwtSrv,
+		cache:           cache,
+		mailService:     mailService,
+		rabbitMQService: rabbitMQService,
 	}
 }
 
@@ -223,20 +232,19 @@ func (as *authService) ForgotPassword(ctx context.Context, email string) error {
 
 	resetLink := fmt.Sprintf("https://yourdomain.com/reset-password?token=%s", token)
 
-	err = as.mailService.SendWithTemplate(
-		ctx,
-		[]mail.Address{
-			{Email: email},
-		},
-		"Password Reset Request",
-		"forgot_password.html",
-		template.ForgotPasswordTemplateData{
+	msg := mail.MailMessageTemplate{
+		To:           []mail.Address{{Email: email}},
+		Subject:      "Password Reset Request",
+		TemplateName: "forgot_password.html",
+		Data: template.ForgotPasswordTemplateData{
 			Username:  user.Fullname,
 			ResetLink: resetLink,
 		},
-	)
+	}
+
+	err = as.rabbitMQService.Publish(ctx, rabbitmq.AuthEmailQueue, msg)
 	if err != nil {
-		return utils.NewError("Failed to send reset email", utils.CodeBadRequest)
+		return utils.WrapError(err, "Failed to publish reset email task", utils.CodeInternalServerError)
 	}
 
 	return nil

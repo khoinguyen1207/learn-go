@@ -6,15 +6,16 @@ import (
 	"project-shopping/internal/routes"
 	"project-shopping/internal/service"
 	"project-shopping/pkg/mail"
+	"project-shopping/pkg/rabbitmq"
 )
 
 type AuthModule struct {
 	routes routes.Route
 }
 
-func NewAuthModule(mctx *ModuleContext, mailService mail.MailService) *AuthModule {
+func NewAuthModule(mctx *ModuleContext, mailService mail.MailService, rabbitMQService rabbitmq.RabbitMQService) *AuthModule {
 	userRepository := repository.NewUserRepository(mctx.db)
-	authService := service.NewAuthService(userRepository, mctx.jwt, mctx.cache, mailService)
+	authService := service.NewAuthService(userRepository, mctx.jwt, mctx.cache, mailService, rabbitMQService)
 	authHandler := handler.NewAuthHandler(authService)
 	authRoutes := routes.NewAuthRoutes(authHandler, mctx.jwt)
 

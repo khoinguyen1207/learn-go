@@ -49,10 +49,6 @@ func (p *SESProvider) Name() string {
 }
 
 func (p *SESProvider) SendMail(ctx context.Context, msg *MailMessage) (*SendResult, error) {
-	msg.From = Address{
-		Name:  "Support Team",
-		Email: p.cfg.From,
-	}
 	toAddresses := make([]string, len(msg.To))
 	toCcAddresses := make([]string, len(msg.Cc))
 	for i, addr := range msg.Cc {
