@@ -2,6 +2,7 @@ package pgx
 
 import (
 	"context"
+	"encoding/json"
 	"project-shopping/pkg/logger"
 	"time"
 
@@ -18,11 +19,12 @@ func (t *PgxZeroLogTracer) Log(ctx context.Context, level tracelog.LogLevel, msg
 	sql, _ := data["sql"].(string)
 	args, _ := data["args"].([]any)
 	duration, _ := data["time"].(time.Duration)
+	argsJson, _ := json.Marshal(args)
 
 	baseLogger := t.Logger.With().
 		Str(logger.TRACE_ID_KEY, logger.GetTraceId(ctx)).
 		Str("sql", sql).
-		Interface("args", args).
+		Interface("args", string(argsJson)).
 		Dur("duration", duration)
 
 	logger := baseLogger.Logger()

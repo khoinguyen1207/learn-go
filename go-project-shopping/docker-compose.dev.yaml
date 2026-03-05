@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     networks:
       - app-network
     healthcheck:
@@ -32,7 +32,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redis-data:/data
       - ./system/redis/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     networks:
@@ -58,9 +58,49 @@ services:
       timeout: 10s
       retries: 3
 
+  grafana:
+    image: grafana/grafana:12.0.0
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - app-network
+    depends_on:
+      - loki
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+    networks:
+      - app-network
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    restart: unless-stopped
+    volumes:
+      - ./internal/logs:/var/log
+      - ./system/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - app-network
+    depends_on:
+      - loki
+
 volumes:
-  db_data:
-  redis_data:
+  db-data:
+  redis-data:
+  grafana-data:
+  loki-data:
 
 networks:
   app-network:
