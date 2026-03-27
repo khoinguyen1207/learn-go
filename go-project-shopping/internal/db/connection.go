@@ -68,3 +68,19 @@ func GetDB() sqlc.Querier {
 func GetDBPool() *pgxpool.Pool {
 	return dbpool
 }
+
+func ExecTx(ctx context.Context, fn func(qtx *sqlc.Queries) error) error {
+	tx, err := dbpool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("Failed to begin transaction: %w", err)
+	}
+
+	qtx := sqlc.New(tx)
+
+	if err := fn(qtx); err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	return tx.Commit(ctx)
+}

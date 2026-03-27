@@ -30,6 +30,7 @@ run-built:
 sqlc:
 	sqlc generate
 
+# ===================== Migration commands =====================
 # Create new migration: (make create-migrate NAME=users_table)
 create-migrate:
 	migrate create -ext sql -dir $(MIGRATION_DIR) -seq $(NAME)
@@ -59,7 +60,11 @@ migrate-goto:
 	migrate -path $(MIGRATION_DIR) -database "$(DATABASE_URL)" goto $(VERSION)
 
 
-# ===================== Docker commands =====================
+# ===================== Database commands =====================
+# Create database
+create-db:
+	docker exec -i postgres-db psql -U postgres -c "CREATE DATABASE gin;"
+
 # Import 
 importdb:
 	docker exec -i postgres-db psql -U postgres -d gin < ./db/backup.sql

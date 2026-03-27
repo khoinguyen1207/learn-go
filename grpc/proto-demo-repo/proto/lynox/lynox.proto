@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package lynox;
+
+option go_package = "proto-demo-repo/gen/lynox;lynoxpg";
+
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+
+message LynoxRequest {
+  string service = 1;
+  google.protobuf.Struct data = 2;
+}
+
+message LynoxResponse {
+  int64 code = 1;
+  int64 balance = 2;
+}
+
+service Lynox {
+  rpc Index (LynoxRequest) returns (LynoxResponse) {
+    option (google.api.http) = {
+      post: "/v1"
+      body: "*"
+    };
+  }
+}
