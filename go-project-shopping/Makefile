@@ -6,6 +6,7 @@ MIGRATION_DIR= internal/db/migrations
 
 COMPOSE_FILE_PROD=docker-compose.prod.yaml
 COMPOSE_FILE_DEV=docker-compose.dev.yaml
+COMPOSE_FILE_REDIS=docker-compose.redis.yaml
 ENV_FILE=.env
 ENV_FILE_EXAMPLE=.env.example
 
@@ -101,4 +102,16 @@ dev:
 stop-dev:
 	docker compose -f $(COMPOSE_FILE_DEV) down
 
-.PHONY: importdb backupdb server create-migrate migrate-up migrate-down migrate-down-n migrate-force migrate-drop migrate-goto sqlc run build run-built prod stop-prod logs-prod bash dev stop-dev run-worker
+
+# ===================== Redis Commands =====================
+redis-up:
+	docker compose -f $(COMPOSE_FILE_REDIS) up -d
+
+redis-down:
+	docker compose -f $(COMPOSE_FILE_REDIS) down
+
+redis-status:
+	docker exec redis-node-1 redis-cli cluster info
+
+
+.PHONY: importdb backupdb server create-migrate migrate-up migrate-down migrate-down-n migrate-force migrate-drop migrate-goto sqlc run build run-built prod stop-prod logs-prod bash dev stop-dev run-worker redis-up redis-down redis-status
