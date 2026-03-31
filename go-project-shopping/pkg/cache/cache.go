@@ -9,10 +9,10 @@ import (
 )
 
 type cacheService struct {
-	rdb *redis.Client
+	rdb *redis.ClusterClient
 }
 
-func NewCacheService(rdb *redis.Client) CacheService {
+func NewCacheService(rdb *redis.ClusterClient) CacheService {
 	return &cacheService{
 		rdb: rdb,
 	}

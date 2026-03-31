@@ -1,5 +1,3 @@
-version: "3.9"
-
 networks:
   app-network:
     name: app-network
@@ -7,7 +5,7 @@ networks:
 
 services:
   redis-node-1:
-    image: redis:7.2-alpine
+    image: redis:8.0-alpine
     container_name: redis-node-1
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
@@ -18,14 +16,9 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis-node-2:
-    image: redis:7.2-alpine
+    image: redis:8.0-alpine
     container_name: redis-node-2
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
@@ -36,14 +29,9 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis-node-3:
-    image: redis:7.2-alpine
+    image: redis:8.0-alpine
     container_name: redis-node-3
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
@@ -54,14 +42,9 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis-node-4:
-    image: redis:7.2-alpine
+    image: redis:8.0-alpine
     container_name: redis-node-4
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
@@ -72,14 +55,9 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis-node-5:
-    image: redis:7.2-alpine
+    image: redis:8.0-alpine
     container_name: redis-node-5
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
@@ -90,14 +68,9 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis-node-6:
-    image: redis:7.2-alpine
+    image: redis:8.0-alpine
     container_name: redis-node-6
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
@@ -108,48 +81,6 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis-cluster-init:
-    image: redis:7.2-alpine
-    container_name: redis-cluster-init
-    networks:
-      - app-network
-    depends_on:
-      redis-node-1:
-        condition: service_healthy
-      redis-node-2:
-        condition: service_healthy
-      redis-node-3:
-        condition: service_healthy
-      redis-node-4:
-        condition: service_healthy
-      redis-node-5:
-        condition: service_healthy
-      redis-node-6:
-        condition: service_healthy
-    # Resolve hostname → IP động rồi mới tạo cluster
-    command: >
-      sh -c "
-        NODE1=$$(getent hosts redis-node-1 | awk '{print $$1}') &&
-        NODE2=$$(getent hosts redis-node-2 | awk '{print $$1}') &&
-        NODE3=$$(getent hosts redis-node-3 | awk '{print $$1}') &&
-        NODE4=$$(getent hosts redis-node-4 | awk '{print $$1}') &&
-        NODE5=$$(getent hosts redis-node-5 | awk '{print $$1}') &&
-        NODE6=$$(getent hosts redis-node-6 | awk '{print $$1}') &&
-        echo \"Creating cluster with nodes: $$NODE1 $$NODE2 $$NODE3 $$NODE4 $$NODE5 $$NODE6\" &&
-        redis-cli --cluster create
-          $$NODE1:6379 $$NODE2:6379 $$NODE3:6379
-          $$NODE4:6379 $$NODE5:6379 $$NODE6:6379
-          --cluster-replicas 1
-          --cluster-yes &&
-        echo 'Cluster initialized!'
-      "
-    restart: "no"
 
 volumes:
   redis-node-1-data:

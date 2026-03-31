@@ -52,7 +52,7 @@ func NewApplication(cfg *config.Config) *Application {
 		logger.Log.Fatal().Err(err).Msg("Failed to connect to the database")
 	}
 
-	redisClient := config.InitRedis(cfg)
+	redisClient := config.InitRedisCluster(cfg)
 	cacheService := cache.NewCacheService(redisClient)
 	jwtService := auth.NewJWTService(cfg)
 

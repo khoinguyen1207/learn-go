@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:18.1-alpine3.23
@@ -20,19 +18,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
-  # redis:
-  #   image: redis:8.0-alpine
-  #   container_name: redis
-  #   restart: unless-stopped
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis-data:/data
-  #     - ./system/redis/redis.conf:/usr/local/etc/redis/redis.conf
-  #   command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-  #   networks:
-  #     - app-network
 
   rabbitmq:
     image: rabbitmq:4.2.4-management-alpine

@@ -108,10 +108,26 @@ redis-up:
 	docker compose -f $(COMPOSE_FILE_REDIS) up -d
 
 redis-down:
-	docker compose -f $(COMPOSE_FILE_REDIS) down
+	docker compose -f $(COMPOSE_FILE_REDIS) down -v
 
 redis-status:
 	docker exec redis-node-1 redis-cli cluster info
+
+redis-cleanup:
+	rm -rf ./data
+
+create-redis-cluster:
+	docker exec -it redis-node-1 redis-cli --cluster create \
+	redis-node-1:6379 \
+	redis-node-2:6379 \
+	redis-node-3:6379 \
+	redis-node-4:6379 \
+	redis-node-5:6379 \
+	redis-node-6:6379 \
+	--cluster-replicas 1
+
+check-slot-key:
+	docker exec -it redis-node-1 redis-cli cluster keyslot $(KEY)
 
 
 .PHONY: importdb backupdb server create-migrate migrate-up migrate-down migrate-down-n migrate-force migrate-drop migrate-goto sqlc run build run-built prod stop-prod logs-prod bash dev stop-dev run-worker redis-up redis-down redis-status
