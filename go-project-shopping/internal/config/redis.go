@@ -3,9 +3,7 @@ package config
 import (
 	"context"
 	"log"
-	"os"
 	"project-shopping/pkg/logger"
-	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -38,16 +36,13 @@ func InitRedis(cfg *Config) *redis.Client {
 }
 
 func InitRedisCluster(cfg *Config) *redis.ClusterClient {
-	redisNodes := os.Getenv("REDIS_CLUSTER_NODES")
-	if redisNodes == "" {
-		logger.Log.Fatal().Msg("REDIS_CLUSTER_NODES environment variable is not set")
+	if cfg.Redis.RedisNodes == nil || len(cfg.Redis.RedisNodes) == 0 {
+		logger.Log.Fatal().Msg("❌ No Redis cluster nodes provided in configuration")
 	}
-
-	redisNodesList := strings.Split(redisNodes, ",")
-	log.Printf("Connecting to Redis Cluster nodes: %v", redisNodesList)
+	log.Printf("Connecting to Redis Cluster nodes: %v", cfg.Redis.RedisNodes)
 
 	clusterClient := redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:        redisNodesList,
+		Addrs:        cfg.Redis.RedisNodes,
 		Username:     cfg.Redis.Username,
 		Password:     cfg.Redis.Password,
 		PoolSize:     20,               // Maximum number of connections in the pool

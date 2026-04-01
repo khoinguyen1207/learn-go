@@ -60,6 +60,13 @@ func GetEnvAsInt(name string, defaultValue int) int {
 	return defaultValue
 }
 
+func GetEnvAsSlice(name string, defaultValue []string, sep string) []string {
+	if valueStr := os.Getenv(name); valueStr != "" {
+		return strings.Split(valueStr, sep)
+	}
+	return defaultValue
+}
+
 func NewLoggerWithPath(filename string, level string) *zerolog.Logger {
 	dir := GetRootDir()
 

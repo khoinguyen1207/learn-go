@@ -10,10 +10,11 @@ type DatabaseConfig struct {
 }
 
 type RedisConfig struct {
-	Address  string
-	Username string
-	Password string
-	DB       int
+	Address    string
+	Username   string
+	Password   string
+	DB         int
+	RedisNodes []string
 }
 
 type JwtConfig struct {
@@ -68,10 +69,11 @@ func NewConfig() {
 			DatabaseUrl: utils.GetEnv("DATABASE_URL", "postgres://user:password@localhost:5432/mydb?sslmode=disable"),
 		},
 		Redis: RedisConfig{
-			Address:  utils.GetEnv("REDIS_ADDRESS", "localhost:6379"),
-			Username: utils.GetEnv("REDIS_USER", ""),
-			Password: utils.GetEnv("REDIS_PASSWORD", ""),
-			DB:       utils.GetEnvAsInt("REDIS_DB", 0),
+			Address:    utils.GetEnv("REDIS_ADDRESS", "localhost:6379"),
+			Username:   utils.GetEnv("REDIS_USER", ""),
+			Password:   utils.GetEnv("REDIS_PASSWORD", ""),
+			DB:         utils.GetEnvAsInt("REDIS_DB", 0),
+			RedisNodes: utils.GetEnvAsSlice("REDIS_CLUSTER_NODES", []string{"localhost:7001"}, ","),
 		},
 		Jwt: JwtConfig{
 			SecretKey:              utils.GetEnv("JWT_SECRET_KEY", "your_secret_key"),
