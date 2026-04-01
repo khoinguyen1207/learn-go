@@ -47,8 +47,9 @@ func (us *userService) GetUsers(ctx context.Context, search, orderBy, sort strin
 	if sort == "" {
 		sort = "desc"
 	}
-
-	cacheKey := generateCacheKey(search, orderBy, sort, page, limit)
+	var version int64
+	us.cache.Get(ctx, "users:version", &version)
+	cacheKey := generateCacheKey(search, orderBy, sort, page, limit, version)
 	var cacheData struct {
 		Users      []sqlc.User `json:"users"`
 		TotalUsers int32       `json:"total_users"`
@@ -117,8 +118,12 @@ func (us *userService) CreateUser(ctx context.Context, input sqlc.CreateUserPara
 		return sqlc.User{}, utils.WrapError(err, "Failed to create user", utils.CodeBadRequest)
 	}
 
-	if err := us.cache.Clear(ctx, "users:*"); err != nil {
-		log.Println("Failed to clear user cache:", err)
+	// if err := us.cache.Clear(ctx, "users:*"); err != nil {
+	// 	log.Println("Failed to clear user cache:", err)
+	// }
+
+	if _, err := us.cache.Incr(ctx, "users:version"); err != nil {
+		log.Println("Failed to increment user version:", err)
 	}
 
 	return user, nil
@@ -143,7 +148,7 @@ func (us *userService) UpdateUser(ctx context.Context, input sqlc.UpdateUserPara
 		return sqlc.User{}, utils.WrapError(err, "Failed to update user", utils.CodeBadRequest)
 	}
 
-	if err := us.cache.Clear(ctx, "users:*"); err != nil {
+	if err := us.cache.Clear(ctx, "users:search:{all}:*"); err != nil {
 		log.Println("Failed to clear user cache:", err)
 	}
 
@@ -164,7 +169,7 @@ func (us *userService) DeleteUser(ctx context.Context, id string) (sqlc.User, er
 		return sqlc.User{}, utils.WrapError(err, "Failed to delete user", utils.CodeBadRequest)
 	}
 
-	if err := us.cache.Clear(ctx, "users:*"); err != nil {
+	if err := us.cache.Clear(ctx, "users:search:{all}:*"); err != nil {
 		log.Println("Failed to clear user cache:", err)
 	}
 
@@ -188,12 +193,12 @@ func (us *userService) RestoreUser(ctx context.Context, id string) (sqlc.User, e
 	return user, nil
 }
 
-func generateCacheKey(search, orderBy, sort string, page, limit int32) string {
+func generateCacheKey(search, orderBy, sort string, page, limit int32, version int64) string {
 	if search == "" {
 		search = "all"
 	}
 	orderBy = utils.NormalizeString(orderBy)
 	sort = utils.NormalizeString(sort)
 
-	return fmt.Sprintf("users:search=%s:orderBy=%s:sort=%s:page=%d:limit=%d", search, orderBy, sort, page, limit)
+	return fmt.Sprintf("users:version=%d:search=%s:orderBy=%s:sort=%s:page=%d:limit=%d", version, search, orderBy, sort, page, limit)
 }

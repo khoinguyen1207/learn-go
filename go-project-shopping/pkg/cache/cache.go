@@ -74,3 +74,7 @@ func (cs *cacheService) Exists(ctx context.Context, key string) (bool, error) {
 
 	return count > 0, nil
 }
+
+func (cs *cacheService) Incr(ctx context.Context, key string) (int64, error) {
+	return cs.rdb.Incr(ctx, key).Result()
+}

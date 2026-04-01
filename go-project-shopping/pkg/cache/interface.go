@@ -11,4 +11,5 @@ type CacheService interface {
 	Clear(ctx context.Context, pattern string) error
 	Delete(ctx context.Context, key string) error
 	Exists(ctx context.Context, key string) (bool, error)
+	Incr(ctx context.Context, key string) (int64, error)
 }
